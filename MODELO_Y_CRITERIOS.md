@@ -1,16 +1,12 @@
 # Nexo SQL Server
 
-## Orden de ejecución
-
-Ver [README.md](README.md#instalación).
-
 ## Entidades
 
-- `Estudiante_Carrera`: un estudiante puede cursar varias carreras; guarda `anio_ingreso` y `estado` (ACTIVO, EGRESADO, INACTIVO) por carrera.
+- `Estudiante_Carrera`: carreras que cursa cada estudiante, con `anio_ingreso` y `estado` (ACTIVO, EGRESADO, INACTIVO).
 - `Oferta_Carrera`: relaciona oferta y carrera e incluye `pertinencia` (ALTA, MEDIA, BAJA) con su `criterio_pertinencia`.
-- `Postulacion`: guarda `id_carrera`; las claves foráneas compuestas exigen que el estudiante pertenezca a esa carrera y que la oferta esté dirigida a ella.
+- `Postulacion`: indica la carrera por la que se postula; las claves foráneas compuestas exigen que el estudiante curse esa carrera y que la oferta esté dirigida a ella.
 - `Postulacion_Estado_Historial` e `Historial_Practica`: trazabilidad de estados, con motivo y `usuario` (`ORIGINAL_LOGIN()`). Los motivos de rechazo son texto libre.
-- `Evaluacion`: tiene `instancia` (PARCIAL o FINAL); hay una evaluación por práctica, evaluador e instancia.
+- `Evaluacion`: una por práctica, evaluador e instancia (PARCIAL o FINAL).
 
 ## Criterios del modelo
 
@@ -24,7 +20,7 @@ Ver [README.md](README.md#instalación).
 
 ## Reglas que aplican los procedimientos
 
-Los procedimientos usan `THROW` con estos códigos: 50001 entidad inexistente, 50002 estado no válido, 50003 transición no permitida, 50005 la carrera no corresponde, 50006 convenio no vigente, 50007 sin vacantes, 50008 fechas incoherentes, 50009 faltan requisitos de cierre, 50010 duplicado, 50011 dato obligatorio faltante (el 50004 no se usa).
+Los procedimientos usan `THROW` con estos códigos: 50001 entidad inexistente, 50002 estado no válido, 50003 transición no permitida, 50005 la carrera no corresponde, 50006 convenio no vigente, 50007 sin vacantes, 50008 fechas incoherentes, 50009 faltan requisitos de cierre, 50010 duplicado, 50011 dato obligatorio faltante.
 
 - Publicar una oferta exige convenio VIGENTE y al menos una carrera asociada.
 - Postularse exige estar ACTIVO en la carrera indicada.
@@ -32,9 +28,5 @@ Los procedimientos usan `THROW` con estos códigos: 50001 entidad inexistente, 5
 - Crear una práctica exige estudiante ACTIVO en la carrera, que termine dentro del convenio y que no tenga otra práctica activa.
 - Cerrar una práctica exige fecha de fin real y evaluaciones FINAL de estudiante y empresa.
 - Registrar una materia aprobada exige que la materia sea de una carrera del estudiante.
-
-## Limitaciones conocidas
-
-- Los huecos en los valores IDENTITY que dejan las pruebas con ROLLBACK son inherentes a SQL Server y no afectan los datos.
 
 Las consultas producen información sobre oportunidades por carrera, resultados por empresa y carrera, brechas de competencias, rankings, vacantes por pertinencia, tiempos entre etapas, motivos de rechazo o retiro, prácticas que requieren intervención y revisiones vencidas.

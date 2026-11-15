@@ -3,9 +3,8 @@ GO
 
 /* ================================================================
    CONSULTAS DE NEGOCIO
-   Consultas 1 a 14: preguntas originales del TP.
-   Consultas 15 a 19: preguntas nuevas (ranking, vacantes, pertinencia,
-   tiempos entre etapas). Consulta 20: revisiones vencidas.
+   Consultas 15 a 19 usan funciones de ventana (ranking, vacantes,
+   pertinencia, tiempos entre etapas). Consulta 20: revisiones vencidas.
    ================================================================ */
 
 -- 1. Cuantos estudiantes hay por carrera? (un estudiante puede estar en
@@ -149,7 +148,7 @@ WHERE NOT EXISTS (
 );
 
 /* ----------------------------------------------------------------
-   CONSULTAS NUEVAS
+   CONSULTAS CON FUNCIONES DE VENTANA
    ---------------------------------------------------------------- */
 
 -- 15. Que carrera logra mayor satisfaccion en sus practicas? Ranking de

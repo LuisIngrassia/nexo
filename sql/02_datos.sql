@@ -2,7 +2,7 @@ USE NexoAcademico;
 GO
 
 /* ================================================================
-   DATOS DE PRUEBA (esquema del contrato F1)
+   DATOS DE PRUEBA
    Fecha de referencia ("hoy"): 2026-11-15. Ningun hecho consumado es posterior.
 
    IDs: se ejecuta sobre las tablas recien creadas por 01_estructura.sql

@@ -52,7 +52,7 @@ CREATE TABLE Estudiante (
 );
 GO
 
--- Un estudiante puede cursar varias carreras (decisión 6).
+-- Un estudiante puede cursar varias carreras.
 CREATE TABLE Estudiante_Carrera (
     id_estudiante INT NOT NULL,
     id_carrera INT NOT NULL,
@@ -113,7 +113,6 @@ CREATE TABLE Estudiante_Competencia (
 );
 GO
 
--- Se quita "activo": era redundante con estado_vinculo (hallazgo 18).
 CREATE TABLE Empresa (
     id_empresa INT IDENTITY(1,1) NOT NULL,
     cuit VARCHAR(20) NOT NULL,
@@ -156,7 +155,7 @@ CREATE TABLE Convenio (
 );
 GO
 
--- fecha_publicacion es NULL en borradores; la fija usp_PublicarOferta (hallazgo 19).
+-- fecha_publicacion es NULL en borradores; la fija usp_PublicarOferta.
 CREATE TABLE Oferta (
     id_oferta INT IDENTITY(1,1) NOT NULL,
     id_empresa INT NOT NULL,
@@ -187,7 +186,7 @@ CREATE TABLE Oferta (
 );
 GO
 
--- Carreras destinatarias de la oferta, con su pertinencia (decisión 5).
+-- Carreras destinatarias de la oferta, con su pertinencia.
 CREATE TABLE Oferta_Carrera (
     id_oferta INT NOT NULL,
     id_carrera INT NOT NULL,
@@ -314,7 +313,7 @@ CREATE TABLE Practica (
         CHECK (modalidad IN ('PRESENCIAL', 'REMOTA', 'HIBRIDA')),
     CONSTRAINT CK_Practica_Estado
         CHECK (estado IN ('PLANIFICADA', 'EN_CURSO', 'FINALIZADA', 'INTERRUMPIDA')),
-    -- Coherencia: solo las prácticas terminadas tienen fecha de fin real (hallazgo 8).
+    -- Coherencia: solo las prácticas terminadas tienen fecha de fin real.
     CONSTRAINT CK_Practica_FinReal
         CHECK ((estado IN ('FINALIZADA', 'INTERRUMPIDA') AND fecha_fin_real IS NOT NULL)
             OR (estado IN ('PLANIFICADA', 'EN_CURSO') AND fecha_fin_real IS NULL)),
@@ -323,7 +322,7 @@ CREATE TABLE Practica (
 );
 GO
 
--- Cambios de estado de la práctica; lo cargan los procedimientos (decisión 3).
+-- Cambios de estado de la práctica; lo cargan los procedimientos.
 CREATE TABLE Historial_Practica (
     id_historial INT IDENTITY(1,1) NOT NULL,
     id_practica INT NOT NULL,
@@ -372,7 +371,7 @@ CREATE TABLE Seguimiento (
 );
 GO
 
--- instancia distingue la evaluación PARCIAL de la FINAL (decisión 13, hallazgo 2).
+-- instancia distingue la evaluación PARCIAL de la FINAL.
 CREATE TABLE Evaluacion (
     id_evaluacion INT IDENTITY(1,1) NOT NULL,
     id_practica INT NOT NULL,
@@ -494,7 +493,7 @@ INNER JOIN Empresa em ON em.id_empresa = o.id_empresa
 LEFT JOIN Seguimiento s ON s.id_practica = p.id_practica;
 GO
 
--- Prácticas en curso cuyo ÚLTIMO seguimiento pide atención (hallazgo 7).
+-- Prácticas en curso cuyo ÚLTIMO seguimiento pide atención.
 CREATE VIEW vw_PracticasQueRequierenIntervencion
 AS
 SELECT
@@ -525,7 +524,7 @@ WHERE p.estado = 'EN_CURSO'
   AND s.estado_seguimiento IN ('EN_OBSERVACION', 'REQUIERE_INTERVENCION');
 GO
 
--- Embudo acumulativo (hallazgo 21): por oferta y estado, cuántas postulaciones
+-- Embudo acumulativo: por oferta y estado, cuántas postulaciones
 -- llegaron alguna vez a ese estado según el historial (no solo el estado actual).
 CREATE VIEW vw_EmbudoPostulaciones
 AS
@@ -578,7 +577,7 @@ LEFT JOIN Evaluacion ev
 GROUP BY c.id_carrera, c.nombre, c.plan_estudios;
 GO
 
--- Compara niveles (hallazgo 21): cuántos estudiantes alcanzan el nivel máximo
+-- Compara niveles: cuántos estudiantes alcanzan el nivel máximo
 -- que piden las ofertas. Subconsultas agregadas, sin producto cartesiano.
 CREATE VIEW vw_BrechaCompetencias
 AS
@@ -634,7 +633,7 @@ GO
 
 /* ================================================================
    3. FUNCIÓN
-   Orientativa (decisión 21): no considera "obligatoria";
+   Orientativa: no considera "obligatoria";
    las obligatorias faltantes las informa usp_VerCompatibilidad.
    ================================================================ */
 
@@ -677,7 +676,7 @@ GO
    4. PROCEDIMIENTOS
    Patrón de los que escriben: validaciones (IF ... THROW) primero y,
    si hay más de una escritura, BEGIN TRY / TRANSACTION / CATCH con ROLLBACK
-   y THROW. Códigos en decisiones_F1.md:
+   y THROW. Códigos de error:
    50001 inexistente, 50002 estado no válido, 50003 transición no permitida,
    50005 carrera, 50006 convenio, 50007 vacantes,
    50008 fechas, 50009 requisitos de cierre, 50010 duplicado,
@@ -904,7 +903,7 @@ BEGIN
 END;
 GO
 
--- Si la postulación está EN_REVISION, la pasa a ENTREVISTA (hallazgo 22).
+-- Si la postulación está EN_REVISION, la pasa a ENTREVISTA.
 CREATE PROCEDURE usp_RegistrarEntrevista
     @id_postulacion INT,
     @fecha DATETIME,
@@ -953,7 +952,7 @@ BEGIN
 END;
 GO
 
--- Resuelve una entrevista PENDIENTE (hallazgo 22).
+-- Resuelve una entrevista PENDIENTE.
 CREATE PROCEDURE usp_ActualizarResultadoEntrevista
     @id_entrevista INT,
     @resultado VARCHAR(15),
@@ -1024,7 +1023,7 @@ BEGIN
           AND c.estado = 'VIGENTE'
     )
         THROW 50006, 'La oferta no tiene un convenio vigente.', 1;
-    -- La práctica completa tiene que quedar dentro del convenio (hallazgo 23).
+    -- La práctica completa tiene que quedar dentro del convenio.
     IF NOT EXISTS (
         SELECT 1
         FROM Postulacion p
@@ -1333,12 +1332,12 @@ GO
 
 /* ================================================================
    5. TRIGGERS DE AUDITORÍA
-   Se eliminan los de Postulacion y Practica: sus cambios de estado ya
-   quedan en Postulacion_Estado_Historial y Historial_Practica.
-   Se mantienen los de Seguimiento y Evaluacion: ningún procedimiento
-   modifica esas filas, así que cualquier UPDATE es una corrección manual
-   y conviene dejarla registrada con su usuario. Solo auditan si el valor
-   cambió; el usuario lo completa el DEFAULT ORIGINAL_LOGIN().
+   Auditan Seguimiento y Evaluacion: ningún procedimiento modifica esas
+   filas, así que cualquier UPDATE es una corrección manual que conviene
+   registrar con su usuario. Postulacion y Practica no necesitan trigger:
+   sus cambios de estado quedan en sus tablas de historial.
+   Solo auditan si el valor cambió; el usuario lo completa el DEFAULT
+   ORIGINAL_LOGIN().
    ================================================================ */
 
 CREATE TRIGGER tr_Seguimiento_Auditoria

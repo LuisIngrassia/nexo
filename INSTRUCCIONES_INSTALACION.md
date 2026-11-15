@@ -19,24 +19,18 @@
 Para cada archivo de la carpeta `sql`, en este orden:
 
 1. Presionar `Ctrl + O` y abrir el archivo.
-2. Verificar que la base seleccionada sea `NexoAcademico` (en `00` todavía no existe; el script la crea). Los scripts 01 a 04 empiezan con `USE NexoAcademico;`. Si aparece "Invalid object name", la ventana quedó en `master`.
+2. Verificar que la base seleccionada sea `NexoAcademico` (salvo en `00`, que la crea).
 3. Ejecutar con `F5`.
 
 | Archivo | Qué hace |
 |---|---|
-| `00_crear_base.sql` | Crea la base `NexoAcademico`. Si ya existe, no volver a ejecutarlo. |
+| `00_crear_base.sql` | Crea la base `NexoAcademico`. |
 | `01_estructura.sql` | Crea tablas, restricciones, vistas, función, procedimientos, triggers e índices. |
-| `02_datos.sql` | Carga los datos ficticios. Ejecutarlo una sola vez: repetirlo duplicaría registros. |
+| `02_datos.sql` | Carga los datos ficticios. Se ejecuta una sola vez. |
 | `03_consultas.sql` | Ejecuta las 20 consultas de negocio. |
-| `04_pruebas_integridad.sql` | Ejecuta 32 pruebas. Se esperan 32 líneas `OK -` y ninguna `FALLA`. Cada prueba revierte sus cambios (ROLLBACK); solo quedan huecos en los valores IDENTITY. |
+| `04_pruebas_integridad.sql` | Ejecuta 32 pruebas; se esperan 32 líneas `OK -`. No modifica los datos. |
 
 ## Verificación
-
-Antes de ejecutar los pasos 2 a 5, confirmar que la base activa es `NexoAcademico`. Los scripts 01 a 04 empiezan con `USE NexoAcademico;`, pero conviene comprobarlo, porque una ventana abierta con `Ctrl + O` suele quedar en `master`:
-
-```sql
-SELECT DB_NAME() AS base_actual;  -- debe devolver NexoAcademico
-```
 
 Ejecutar en una consulta nueva:
 
@@ -54,10 +48,10 @@ SELECT
 
 El resultado esperado es:
 
-- 20 tablas (18 originales más `Estudiante_Carrera` e `Historial_Practica`).
+- 20 tablas.
 - 9 vistas.
-- 14 procedimientos (incluye `usp_ActualizarResultadoEntrevista`).
-- 2 triggers de auditoría (Seguimiento y Evaluacion).
+- 14 procedimientos.
+- 2 triggers.
 - 1 función.
 
 Para verificar la cantidad de registros:
@@ -76,16 +70,8 @@ ORDER BY t.name;
 
 Cada tabla debe tener al menos 10 registros.
 
-## Archivos
-
-1. `00_crear_base.sql`: crea la base.
-2. `01_estructura.sql`: crea la estructura.
-3. `02_datos.sql`: carga los datos ficticios.
-4. `03_consultas.sql`: ejecuta las consultas del proyecto.
-5. `04_pruebas_integridad.sql`: comprueba las restricciones.
-
 ## Base existente
 
-Si `NexoAcademico` ya aparece en SQL Server, no ejecutar nuevamente los pasos 1, 2 y 3. Para revisar la instalación existente, ejecutar solamente las consultas y las pruebas.
+Si `NexoAcademico` ya aparece en SQL Server, no ejecutar nuevamente `00`, `01` y `02`. Para revisar la instalación existente, ejecutar solamente las consultas y las pruebas.
 
 No eliminar ni reemplazar una base existente sin realizar antes una copia de seguridad o confirmar que sus datos pueden descartarse.
