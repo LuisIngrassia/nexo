@@ -58,7 +58,7 @@ Las 20 consultas muestran oportunidades por carrera, competencias solicitadas, e
 3. Verificar que la base seleccionada sea `NexoAcademico`.
 4. Ejecutar con `F5`.
 
-El resultado esperado son 49 líneas que comienzan con `OK` y un resumen final con 0 pruebas en `FALLA`, 0 transacciones abiertas y 0 tablas con filas distintas. Cada prueba revierte sus cambios (ROLLBACK); solo quedan huecos en los valores IDENTITY, que son inherentes al ROLLBACK.
+El resultado esperado son 32 líneas que comienzan con `OK -` y ninguna con `FALLA`. Cada prueba revierte sus cambios (ROLLBACK); solo quedan huecos en los valores IDENTITY, que son inherentes al ROLLBACK.
 
 ## Verificación
 
@@ -87,7 +87,7 @@ El resultado esperado es:
 - 20 tablas (18 originales más `Estudiante_Carrera` e `Historial_Practica`).
 - 9 vistas.
 - 14 procedimientos (incluye `usp_ActualizarResultadoEntrevista`).
-- Los triggers de auditoría definidos en `01_estructura.sql` (el conteo exacto lo fija ese archivo).
+- 2 triggers de auditoría (Seguimiento y Evaluacion).
 - 1 función.
 
 Para verificar la cantidad de registros:

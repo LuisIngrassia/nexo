@@ -10,7 +10,7 @@ Base de datos en Microsoft SQL Server para gestionar carreras, estudiantes, empr
 - 14 procedimientos almacenados.
 - Triggers de auditoría (detalle en `01_estructura.sql`).
 - 20 consultas de negocio.
-- 49 pruebas de integridad, de tipo, de rango y de procedimientos.
+- 32 pruebas de integridad, de tipo, de rango y de procedimientos.
 - Un mínimo de 10 registros ficticios por tabla.
 
 ## Instalación
