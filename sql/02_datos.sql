@@ -12,18 +12,13 @@ GO
    quedan garantizados. Si se vuelve a ejecutar, recrear la base antes.
 
    Auditoria_Cambios: los triggers son AFTER UPDATE, asi que un INSERT no los
-   dispara. Se cargan a mano solo filas de Seguimiento y Evaluacion (correcciones
-   de estado posteriores a la carga, coherentes con el valor final de cada fila).
-   Las altas/cambios de Postulacion y Practica no se auditan a mano: los
-   registran Postulacion_Estado_Historial e Historial_Practica, y los triggers
-   los auditaran cuando los procedimientos hagan los UPDATE.
+   dispara. Se cargan a mano filas de Seguimiento y Evaluacion (correcciones
+   de estado coherentes con el valor final de cada fila).
 
    Mapa de IDs usado por todo el script:
      Practica k = Postulacion k (k = 1..11); Estudiante k <-> Carrera k (k = 1..10).
    ================================================================ */
 
-SET XACT_ABORT ON;
-BEGIN TRAN;
 
 INSERT INTO Carrera (nombre, unidad_academica, plan_estudios, nivel)
 VALUES
@@ -468,5 +463,4 @@ VALUES
     ('Evaluacion', 21, '2026-08-29 09:00', 'A_MEJORAR', 'INSATISFACTORIA'),
     ('Evaluacion', 22, '2026-08-29 09:30', 'SATISFACTORIA', 'A_MEJORAR');
 
-COMMIT;
 GO
