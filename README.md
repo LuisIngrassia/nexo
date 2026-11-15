@@ -4,13 +4,13 @@ Base de datos en Microsoft SQL Server para gestionar carreras, estudiantes, empr
 
 ## Contenido
 
-- 18 tablas.
+- 20 tablas (incluye `Estudiante_Carrera` e `Historial_Practica`).
 - 9 vistas.
 - 1 función de compatibilidad.
-- 13 procedimientos almacenados.
-- 4 triggers de auditoría.
-- 14 consultas de negocio.
-- 6 pruebas de integridad.
+- 14 procedimientos almacenados.
+- Triggers de auditoría (detalle en `01_estructura.sql`).
+- 20 consultas de negocio.
+- 49 pruebas de integridad, de tipo, de rango y de procedimientos.
 - Un mínimo de 10 registros ficticios por tabla.
 
 ## Instalación
@@ -24,6 +24,8 @@ Ejecutar los archivos de la carpeta `sql` en este orden:
 5. `04_pruebas_integridad.sql`
 
 La instalación utiliza la base `NexoAcademico` y fue verificada en SQL Server Express.
+
+Antes de ejecutar cada script, verificar que la base activa sea `NexoAcademico` (`SELECT DB_NAME();`). Los scripts 01 a 04 empiezan con `USE NexoAcademico;`.
 
 Las instrucciones detalladas se encuentran en [INSTRUCCIONES_INSTALACION.md](INSTRUCCIONES_INSTALACION.md).
 

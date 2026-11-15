@@ -5,7 +5,7 @@
 - Microsoft SQL Server.
 - SQL Server Management Studio.
 - Una conexión con permiso para crear bases de datos.
-- Los archivos de la carpeta `output\sql`.
+- Los archivos de la carpeta `sql`.
 
 ## Conexión
 
@@ -46,19 +46,27 @@ Este archivo debe ejecutarse una sola vez. Volver a ejecutarlo produciría regis
 
 1. Presionar `Ctrl + O`.
 2. Abrir `03_consultas.sql`.
-3. Ejecutar con `F5`.
+3. Verificar que la base seleccionada sea `NexoAcademico` (selector de base de datos de SSMS). El script ya empieza con `USE NexoAcademico;`; si falla con "Invalid object name", la ventana está en `master`.
+4. Ejecutar con `F5`.
 
-Las consultas muestran oportunidades por carrera, competencias solicitadas, estados de postulación, prácticas activas, resultados y brechas de competencias.
+Las 20 consultas muestran oportunidades por carrera, competencias solicitadas, estados de postulación, prácticas activas, resultados, brechas de competencias, rankings, vacantes por pertinencia, tiempos entre etapas y revisiones vencidas.
 
 ### Paso 5 Ejecutar las pruebas
 
 1. Presionar `Ctrl + O`.
 2. Abrir `04_pruebas_integridad.sql`.
-3. Ejecutar con `F5`.
+3. Verificar que la base seleccionada sea `NexoAcademico`.
+4. Ejecutar con `F5`.
 
-El resultado esperado son seis mensajes que comienzan con `CORRECTO`. Las pruebas revierten sus cambios y no modifican los datos instalados.
+El resultado esperado son 49 líneas que comienzan con `OK` y un resumen final con 0 pruebas en `FALLA`, 0 transacciones abiertas y 0 tablas con filas distintas. Cada prueba revierte sus cambios (ROLLBACK); solo quedan huecos en los valores IDENTITY, que son inherentes al ROLLBACK.
 
 ## Verificación
+
+Antes de ejecutar los pasos 2 a 5, confirmar que la base activa es `NexoAcademico`. Los scripts 01 a 04 empiezan con `USE NexoAcademico;`, pero conviene comprobarlo, porque una ventana abierta con `Ctrl + O` suele quedar en `master`:
+
+```sql
+SELECT DB_NAME() AS base_actual;  -- debe devolver NexoAcademico
+```
 
 Ejecutar en una consulta nueva:
 
@@ -76,10 +84,10 @@ SELECT
 
 El resultado esperado es:
 
-- 18 tablas.
+- 20 tablas (18 originales más `Estudiante_Carrera` e `Historial_Practica`).
 - 9 vistas.
-- 13 procedimientos.
-- 4 triggers.
+- 14 procedimientos (incluye `usp_ActualizarResultadoEntrevista`).
+- Los triggers de auditoría definidos en `01_estructura.sql` (el conteo exacto lo fija ese archivo).
 - 1 función.
 
 Para verificar la cantidad de registros:
