@@ -1,0 +1,44 @@
+erDiagram
+    direction TB
+    Carrera ||--o{ Materia : "tiene"
+    Estudiante ||--o{ Estudiante_Carrera : "cursa"
+    Carrera ||--o{ Estudiante_Carrera : "inscribe"
+    Estudiante ||--o{ Estudiante_Materia : "aprueba"
+    Materia ||--o{ Estudiante_Materia : "aprobada en"
+    Estudiante ||--o{ Estudiante_Competencia : "declara"
+    Competencia ||--o{ Estudiante_Competencia : "declarada en"
+    Empresa ||--o{ Convenio : "firma"
+    Empresa ||--o{ Oferta : "publica"
+    Convenio |o--o{ Oferta : "enmarca"
+    Oferta ||--o{ Oferta_Carrera : "dirigida a"
+    Carrera ||--o{ Oferta_Carrera : "habilitada en"
+    Oferta ||--o{ Oferta_Competencia : "requiere"
+    Competencia ||--o{ Oferta_Competencia : "requerida en"
+    Estudiante_Carrera ||--o{ Postulacion : "origina"
+    Oferta_Carrera ||--o{ Postulacion : "recibe"
+    Postulacion ||--o{ Postulacion_Estado_Historial : "registra"
+    Postulacion ||--o{ Entrevista : "tiene"
+    Postulacion ||--o| Practica : "genera"
+    Practica ||--o{ Historial_Practica : "registra"
+    Practica ||--o{ Seguimiento : "tiene"
+    Practica ||--o{ Evaluacion : "recibe"
+    Carrera
+    Materia
+    Estudiante
+    Estudiante_Carrera
+    Estudiante_Materia
+    Competencia
+    Estudiante_Competencia
+    Empresa
+    Convenio
+    Oferta
+    Oferta_Carrera
+    Oferta_Competencia
+    Postulacion
+    Postulacion_Estado_Historial
+    Entrevista
+    Practica
+    Historial_Practica
+    Seguimiento
+    Evaluacion
+    Auditoria_Cambios
