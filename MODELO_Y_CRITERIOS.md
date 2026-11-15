@@ -2,12 +2,7 @@
 
 ## Orden de ejecución
 
-1. Ejecutar `00_crear_base.sql` para crear y seleccionar la base de datos.
-2. Ejecutar `01_estructura.sql` para crear tablas, restricciones, vistas, función, procedimientos, triggers e índices.
-3. Ejecutar `02_datos.sql` para cargar los datos ficticios de la entrega.
-4. Verificar que la base activa sea `NexoAcademico` (`SELECT DB_NAME();`).
-5. Ejecutar `03_consultas.sql` para obtener los resultados del proyecto.
-6. Ejecutar `04_pruebas_integridad.sql` para comprobar restricciones y reglas de los procedimientos.
+Ver [README.md](README.md#instalación).
 
 ## Entidades
 

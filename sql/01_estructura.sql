@@ -242,10 +242,7 @@ CREATE TABLE Postulacion (
         )),
     CONSTRAINT CK_Postulacion_Origen
         CHECK (origen IN ('CV', 'PORTAL', 'REFERIDO', 'FERIA')),
-    CONSTRAINT FK_Postulacion_Estudiante FOREIGN KEY (id_estudiante)
-        REFERENCES Estudiante (id_estudiante),
-    CONSTRAINT FK_Postulacion_Oferta FOREIGN KEY (id_oferta)
-        REFERENCES Oferta (id_oferta),
+    -- Las FK compuestas ya garantizan que existan el estudiante y la oferta.
     CONSTRAINT FK_Postulacion_EstudianteCarrera FOREIGN KEY (id_estudiante, id_carrera)
         REFERENCES Estudiante_Carrera (id_estudiante, id_carrera),
     CONSTRAINT FK_Postulacion_OfertaCarrera FOREIGN KEY (id_oferta, id_carrera)
@@ -409,14 +406,12 @@ CREATE TABLE Auditoria_Cambios (
     id_auditoria INT IDENTITY(1,1) NOT NULL,
     tabla VARCHAR(50) NOT NULL,
     id_registro INT NOT NULL,
-    operacion VARCHAR(10) NOT NULL,
     fecha DATETIME NOT NULL DEFAULT GETDATE(),
     valor_anterior VARCHAR(100) NULL,
     valor_nuevo VARCHAR(100) NULL,
     usuario VARCHAR(128) NOT NULL DEFAULT ORIGINAL_LOGIN(),
 
-    CONSTRAINT PK_Auditoria_Cambios PRIMARY KEY (id_auditoria),
-    CONSTRAINT CK_Auditoria_Operacion CHECK (operacion = 'UPDATE')
+    CONSTRAINT PK_Auditoria_Cambios PRIMARY KEY (id_auditoria)
 );
 GO
 
@@ -1353,9 +1348,9 @@ AS
 BEGIN
     SET NOCOUNT ON;
     INSERT INTO Auditoria_Cambios
-        (tabla, id_registro, operacion, valor_anterior, valor_nuevo)
+        (tabla, id_registro, valor_anterior, valor_nuevo)
     SELECT
-        'Seguimiento', i.id_seguimiento, 'UPDATE',
+        'Seguimiento', i.id_seguimiento,
         d.estado_seguimiento, i.estado_seguimiento
     FROM inserted i
     INNER JOIN deleted d ON d.id_seguimiento = i.id_seguimiento
@@ -1370,9 +1365,9 @@ AS
 BEGIN
     SET NOCOUNT ON;
     INSERT INTO Auditoria_Cambios
-        (tabla, id_registro, operacion, valor_anterior, valor_nuevo)
+        (tabla, id_registro, valor_anterior, valor_nuevo)
     SELECT
-        'Evaluacion', i.id_evaluacion, 'UPDATE', d.resultado, i.resultado
+        'Evaluacion', i.id_evaluacion, d.resultado, i.resultado
     FROM inserted i
     INNER JOIN deleted d ON d.id_evaluacion = i.id_evaluacion
     WHERE d.resultado <> i.resultado;

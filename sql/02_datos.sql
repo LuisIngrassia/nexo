@@ -455,18 +455,18 @@ VALUES
 
 -- Solo Seguimiento y Evaluacion; el valor_nuevo coincide con el valor final de la fila (ids por orden de insercion).
 INSERT INTO Auditoria_Cambios
-    (tabla, id_registro, operacion, fecha, valor_anterior, valor_nuevo)
+    (tabla, id_registro, fecha, valor_anterior, valor_nuevo)
 VALUES
-    ('Seguimiento', 4, 'UPDATE', '2026-10-16 17:00', 'SIN_NOVEDADES', 'EN_OBSERVACION'),
-    ('Seguimiento', 17, 'UPDATE', '2026-10-20 09:00', 'EN_OBSERVACION', 'REQUIERE_INTERVENCION'),
-    ('Seguimiento', 19, 'UPDATE', '2026-07-28 10:00', 'SIN_NOVEDADES', 'EN_OBSERVACION'),
-    ('Seguimiento', 20, 'UPDATE', '2026-08-25 10:00', 'EN_OBSERVACION', 'REQUIERE_INTERVENCION'),
-    ('Seguimiento', 21, 'UPDATE', '2026-10-13 10:00', 'EN_OBSERVACION', 'REQUIERE_INTERVENCION'),
-    ('Evaluacion', 3, 'UPDATE', '2026-11-03 09:00', 'SATISFACTORIA', 'A_MEJORAR'),
-    ('Evaluacion', 19, 'UPDATE', '2026-11-08 09:00', 'SATISFACTORIA', 'A_MEJORAR'),
-    ('Evaluacion', 20, 'UPDATE', '2026-11-08 09:30', 'SATISFACTORIA', 'A_MEJORAR'),
-    ('Evaluacion', 21, 'UPDATE', '2026-08-29 09:00', 'A_MEJORAR', 'INSATISFACTORIA'),
-    ('Evaluacion', 22, 'UPDATE', '2026-08-29 09:30', 'SATISFACTORIA', 'A_MEJORAR');
+    ('Seguimiento', 4, '2026-10-16 17:00', 'SIN_NOVEDADES', 'EN_OBSERVACION'),
+    ('Seguimiento', 17, '2026-10-20 09:00', 'EN_OBSERVACION', 'REQUIERE_INTERVENCION'),
+    ('Seguimiento', 19, '2026-07-28 10:00', 'SIN_NOVEDADES', 'EN_OBSERVACION'),
+    ('Seguimiento', 20, '2026-08-25 10:00', 'EN_OBSERVACION', 'REQUIERE_INTERVENCION'),
+    ('Seguimiento', 21, '2026-10-13 10:00', 'EN_OBSERVACION', 'REQUIERE_INTERVENCION'),
+    ('Evaluacion', 3, '2026-11-03 09:00', 'SATISFACTORIA', 'A_MEJORAR'),
+    ('Evaluacion', 19, '2026-11-08 09:00', 'SATISFACTORIA', 'A_MEJORAR'),
+    ('Evaluacion', 20, '2026-11-08 09:30', 'SATISFACTORIA', 'A_MEJORAR'),
+    ('Evaluacion', 21, '2026-08-29 09:00', 'A_MEJORAR', 'INSATISFACTORIA'),
+    ('Evaluacion', 22, '2026-08-29 09:30', 'SATISFACTORIA', 'A_MEJORAR');
 
 COMMIT;
 GO

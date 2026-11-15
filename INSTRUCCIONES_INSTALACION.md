@@ -16,49 +16,19 @@
 
 ## Instalación
 
-### Paso 1 Crear la base
+Para cada archivo de la carpeta `sql`, en este orden:
 
-1. Presionar `Ctrl + O`.
-2. Abrir `00_crear_base.sql`.
+1. Presionar `Ctrl + O` y abrir el archivo.
+2. Verificar que la base seleccionada sea `NexoAcademico` (en `00` todavía no existe; el script la crea). Los scripts 01 a 04 empiezan con `USE NexoAcademico;`. Si aparece "Invalid object name", la ventana quedó en `master`.
 3. Ejecutar con `F5`.
 
-Este archivo crea y selecciona la base `NexoAcademico`. Si la base ya existe, no volver a ejecutarlo.
-
-### Paso 2 Crear la estructura
-
-1. Presionar `Ctrl + O`.
-2. Abrir `01_estructura.sql`.
-3. Verificar que la base seleccionada sea `NexoAcademico`.
-4. Ejecutar con `F5`.
-
-Este archivo crea las tablas, restricciones, vistas, función, procedimientos, triggers e índices.
-
-### Paso 3 Cargar los datos
-
-1. Presionar `Ctrl + O`.
-2. Abrir `02_datos.sql`.
-3. Verificar que la base seleccionada sea `NexoAcademico`.
-4. Ejecutar con `F5`.
-
-Este archivo debe ejecutarse una sola vez. Volver a ejecutarlo produciría registros duplicados.
-
-### Paso 4 Ejecutar las consultas
-
-1. Presionar `Ctrl + O`.
-2. Abrir `03_consultas.sql`.
-3. Verificar que la base seleccionada sea `NexoAcademico` (selector de base de datos de SSMS). El script ya empieza con `USE NexoAcademico;`; si falla con "Invalid object name", la ventana está en `master`.
-4. Ejecutar con `F5`.
-
-Las 20 consultas muestran oportunidades por carrera, competencias solicitadas, estados de postulación, prácticas activas, resultados, brechas de competencias, rankings, vacantes por pertinencia, tiempos entre etapas y revisiones vencidas.
-
-### Paso 5 Ejecutar las pruebas
-
-1. Presionar `Ctrl + O`.
-2. Abrir `04_pruebas_integridad.sql`.
-3. Verificar que la base seleccionada sea `NexoAcademico`.
-4. Ejecutar con `F5`.
-
-El resultado esperado son 32 líneas que comienzan con `OK -` y ninguna con `FALLA`. Cada prueba revierte sus cambios (ROLLBACK); solo quedan huecos en los valores IDENTITY, que son inherentes al ROLLBACK.
+| Archivo | Qué hace |
+|---|---|
+| `00_crear_base.sql` | Crea la base `NexoAcademico`. Si ya existe, no volver a ejecutarlo. |
+| `01_estructura.sql` | Crea tablas, restricciones, vistas, función, procedimientos, triggers e índices. |
+| `02_datos.sql` | Carga los datos ficticios. Ejecutarlo una sola vez: repetirlo duplicaría registros. |
+| `03_consultas.sql` | Ejecuta las 20 consultas de negocio. |
+| `04_pruebas_integridad.sql` | Ejecuta 32 pruebas. Se esperan 32 líneas `OK -` y ninguna `FALLA`. Cada prueba revierte sus cambios (ROLLBACK); solo quedan huecos en los valores IDENTITY. |
 
 ## Verificación
 
