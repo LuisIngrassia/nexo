@@ -14,7 +14,7 @@ SELECT
     c.nombre AS carrera,
     c.plan_estudios,
     COUNT(ec.id_estudiante) AS cantidad_estudiantes,
-    COUNT(CASE WHEN ec.estado = N'ACTIVO' THEN 1 END) AS estudiantes_activos
+    COUNT(CASE WHEN ec.estado = 'ACTIVO' THEN 1 END) AS estudiantes_activos
 FROM Carrera c
 LEFT JOIN Estudiante_Carrera ec ON ec.id_carrera = c.id_carrera
 GROUP BY c.nombre, c.plan_estudios
@@ -26,10 +26,10 @@ SELECT
     c.nombre AS carrera,
     c.plan_estudios,
     COUNT(o.id_oferta) AS cantidad_ofertas,
-    COUNT(CASE WHEN o.id_oferta IS NOT NULL AND oc.pertinencia = N'ALTA' THEN 1 END) AS ofertas_pertinencia_alta
+    COUNT(CASE WHEN o.id_oferta IS NOT NULL AND oc.pertinencia = 'ALTA' THEN 1 END) AS ofertas_pertinencia_alta
 FROM Carrera c
 LEFT JOIN Oferta_Carrera oc ON oc.id_carrera = c.id_carrera
-LEFT JOIN Oferta o ON o.id_oferta = oc.id_oferta AND o.estado = N'PUBLICADA'
+LEFT JOIN Oferta o ON o.id_oferta = oc.id_oferta AND o.estado = 'PUBLICADA'
 GROUP BY c.nombre, c.plan_estudios
 ORDER BY cantidad_ofertas DESC;
 
@@ -51,9 +51,9 @@ SELECT
     c.nombre AS competencia,
     ec.nivel_declarado,
     CASE
-        WHEN ec.nivel_declarado = 1 THEN N'BASICO'
-        WHEN ec.nivel_declarado = 2 THEN N'INTERMEDIO'
-        WHEN ec.nivel_declarado = 3 THEN N'AVANZADO'
+        WHEN ec.nivel_declarado = 1 THEN 'BASICO'
+        WHEN ec.nivel_declarado = 2 THEN 'INTERMEDIO'
+        WHEN ec.nivel_declarado = 3 THEN 'AVANZADO'
     END AS nivel
 FROM Estudiante e
 INNER JOIN Estudiante_Competencia ec
@@ -129,7 +129,7 @@ FROM Postulacion_Estado_Historial h
 INNER JOIN Postulacion p ON p.id_postulacion = h.id_postulacion
 INNER JOIN Estudiante e ON e.id_estudiante = p.id_estudiante
 INNER JOIN Oferta o ON o.id_oferta = p.id_oferta
-WHERE h.estado_nuevo IN (N'RECHAZADA', N'RETIRADA')
+WHERE h.estado_nuevo IN ('RECHAZADA', 'RETIRADA')
 ORDER BY p.id_postulacion;
 
 -- 14. Que empresas no tienen convenio vigente a hoy? (se compara contra
@@ -143,7 +143,7 @@ WHERE NOT EXISTS (
     SELECT 1
     FROM Convenio c
     WHERE c.id_empresa = e.id_empresa
-      AND c.estado = N'VIGENTE'
+      AND c.estado = 'VIGENTE'
       AND c.fecha_inicio <= CAST(GETDATE() AS date)
       AND (c.fecha_fin IS NULL OR c.fecha_fin >= CAST(GETDATE() AS date))
 );
@@ -181,10 +181,10 @@ SELECT
 FROM Carrera c
 INNER JOIN Oferta_Carrera oc ON oc.id_carrera = c.id_carrera
 INNER JOIN Oferta o ON o.id_oferta = oc.id_oferta
-WHERE o.estado = N'PUBLICADA'
+WHERE o.estado = 'PUBLICADA'
 GROUP BY c.id_carrera, c.nombre, oc.pertinencia
 ORDER BY c.nombre,
-    CASE oc.pertinencia WHEN N'ALTA' THEN 1 WHEN N'MEDIA' THEN 2 ELSE 3 END;
+    CASE oc.pertinencia WHEN 'ALTA' THEN 1 WHEN 'MEDIA' THEN 2 ELSE 3 END;
 
 -- 17. Cual es la oferta mas demandada de cada carrera y con que pertinencia
 --     la clasifica esa carrera? (ROW_NUMBER por carrera; desempata por id)
@@ -290,6 +290,6 @@ INNER JOIN Estudiante e ON e.id_estudiante = po.id_estudiante
 INNER JOIN Oferta o ON o.id_oferta = po.id_oferta
 INNER JOIN Empresa em ON em.id_empresa = o.id_empresa
 WHERE u.orden = 1
-  AND pr.estado = N'EN_CURSO'
+  AND pr.estado = 'EN_CURSO'
   AND u.proxima_revision < CAST(GETDATE() AS date)
 ORDER BY dias_de_atraso DESC;

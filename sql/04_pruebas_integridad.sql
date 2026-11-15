@@ -21,9 +21,9 @@ GO
 
 CREATE TABLE #Resultado (
     id INT NOT NULL PRIMARY KEY,
-    prueba NVARCHAR(200) NOT NULL,
+    prueba VARCHAR(200) NOT NULL,
     ok BIT NOT NULL,
-    detalle NVARCHAR(600) NULL
+    detalle VARCHAR(600) NULL
 );
 
 -- Foto de filas por tabla para comprobar al final que nada cambio.
@@ -39,32 +39,32 @@ GO
 -- @num / @msg: error capturado (NULL si no hubo error).
 CREATE PROCEDURE #Reg
     @id INT,
-    @prueba NVARCHAR(200),
-    @esperados NVARCHAR(50),
-    @patron NVARCHAR(200),
+    @prueba VARCHAR(200),
+    @esperados VARCHAR(50),
+    @patron VARCHAR(200),
     @num INT,
-    @msg NVARCHAR(4000)
+    @msg VARCHAR(4000)
 AS
 BEGIN
-    DECLARE @ok BIT = 0, @detalle NVARCHAR(600);
+    DECLARE @ok BIT = 0, @detalle VARCHAR(600);
 
     IF @esperados IS NULL
     BEGIN
         IF @num IS NULL SET @ok = 1;
-        ELSE SET @detalle = CONCAT(N'esperaba exito, error ', @num, N': ', LEFT(@msg, 300));
+        ELSE SET @detalle = CONCAT('esperaba exito, error ', @num, ': ', LEFT(@msg, 300));
     END
     ELSE IF @num IS NULL
-        SET @detalle = CONCAT(N'esperaba error ', @esperados, N' pero la operacion se permitio');
-    ELSE IF CONCAT(N',', @esperados, N',') NOT LIKE CONCAT(N'%,', @num, N',%')
-        SET @detalle = CONCAT(N'esperaba error ', @esperados, N', obtuvo ', @num, N': ', LEFT(@msg, 300));
+        SET @detalle = CONCAT('esperaba error ', @esperados, ' pero la operacion se permitio');
+    ELSE IF CONCAT(',', @esperados, ',') NOT LIKE CONCAT('%,', @num, ',%')
+        SET @detalle = CONCAT('esperaba error ', @esperados, ', obtuvo ', @num, ': ', LEFT(@msg, 300));
     ELSE IF @patron IS NOT NULL AND @msg NOT LIKE @patron
-        SET @detalle = CONCAT(N'error ', @num, N' correcto pero el mensaje no contiene ', @patron, N': ', LEFT(@msg, 300));
+        SET @detalle = CONCAT('error ', @num, ' correcto pero el mensaje no contiene ', @patron, ': ', LEFT(@msg, 300));
     ELSE
         SET @ok = 1;
 
     INSERT INTO #Resultado (id, prueba, ok, detalle) VALUES (@id, @prueba, @ok, @detalle);
-    PRINT CONCAT(CASE WHEN @ok = 1 THEN N'OK    ' ELSE N'FALLA ' END,
-                 N'Prueba ', @id, N': ', @prueba, ISNULL(CONCAT(N' -> ', @detalle), N''));
+    PRINT CONCAT(CASE WHEN @ok = 1 THEN 'OK    ' ELSE 'FALLA ' END,
+                 'Prueba ', @id, ': ', @prueba, ISNULL(CONCAT(' -> ', @detalle), ''));
 END;
 GO
 
@@ -75,12 +75,12 @@ BEGIN TRY
     UPDATE TOP (1) Estudiante_Competencia SET nivel_declarado = 'abc';
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 1, @prueba = N'Tipo: texto en nivel_declarado (INT)', @esperados = N'245', @patron = N'%abc%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 1, @prueba = 'Tipo: texto en nivel_declarado (INT)', @esperados = '245', @patron = '%abc%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 1, @prueba = N'Tipo: texto en nivel_declarado (INT)', @esperados = N'245', @patron = N'%abc%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 1, @prueba = 'Tipo: texto en nivel_declarado (INT)', @esperados = '245', @patron = '%abc%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -91,12 +91,12 @@ BEGIN TRY
     UPDATE TOP (1) Oferta SET vacantes = 'muchas';
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 2, @prueba = N'Tipo: texto en vacantes (INT)', @esperados = N'245', @patron = N'%muchas%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 2, @prueba = 'Tipo: texto en vacantes (INT)', @esperados = '245', @patron = '%muchas%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 2, @prueba = N'Tipo: texto en vacantes (INT)', @esperados = N'245', @patron = N'%muchas%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 2, @prueba = 'Tipo: texto en vacantes (INT)', @esperados = '245', @patron = '%muchas%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -107,12 +107,12 @@ BEGIN TRY
     UPDATE TOP (1) Practica SET horas_semanales = 'veinte';
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 3, @prueba = N'Tipo: texto en horas_semanales (INT)', @esperados = N'245', @patron = N'%veinte%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 3, @prueba = 'Tipo: texto en horas_semanales (INT)', @esperados = '245', @patron = '%veinte%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 3, @prueba = N'Tipo: texto en horas_semanales (INT)', @esperados = N'245', @patron = N'%veinte%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 3, @prueba = 'Tipo: texto en horas_semanales (INT)', @esperados = '245', @patron = '%veinte%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -123,12 +123,12 @@ BEGIN TRY
     UPDATE TOP (1) Evaluacion SET puntaje_desempeno = 'alto';
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 4, @prueba = N'Tipo: texto en puntaje_desempeno (DECIMAL)', @esperados = N'8114,245', @patron = NULL, @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 4, @prueba = 'Tipo: texto en puntaje_desempeno (DECIMAL)', @esperados = '8114,245', @patron = NULL, @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 4, @prueba = N'Tipo: texto en puntaje_desempeno (DECIMAL)', @esperados = N'8114,245', @patron = NULL, @num = @n, @msg = @m;
+    EXEC #Reg @id = 4, @prueba = 'Tipo: texto en puntaje_desempeno (DECIMAL)', @esperados = '8114,245', @patron = NULL, @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -139,12 +139,12 @@ BEGIN TRY
     UPDATE TOP (1) Evaluacion SET puntaje_desempeno = 100;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 5, @prueba = N'Tipo: puntaje 100 desborda DECIMAL(3,1)', @esperados = N'8115', @patron = NULL, @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 5, @prueba = 'Tipo: puntaje 100 desborda DECIMAL(3,1)', @esperados = '8115', @patron = NULL, @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 5, @prueba = N'Tipo: puntaje 100 desborda DECIMAL(3,1)', @esperados = N'8115', @patron = NULL, @num = @n, @msg = @m;
+    EXEC #Reg @id = 5, @prueba = 'Tipo: puntaje 100 desborda DECIMAL(3,1)', @esperados = '8115', @patron = NULL, @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -155,12 +155,12 @@ BEGIN TRY
     UPDATE TOP (1) Oferta SET fecha_cierre = 'no-es-una-fecha';
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 6, @prueba = N'Tipo: texto que no es fecha en fecha_cierre (DATE)', @esperados = N'241,242,295', @patron = NULL, @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 6, @prueba = 'Tipo: texto que no es fecha en fecha_cierre (DATE)', @esperados = '241,242,295', @patron = NULL, @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 6, @prueba = N'Tipo: texto que no es fecha en fecha_cierre (DATE)', @esperados = N'241,242,295', @patron = NULL, @num = @n, @msg = @m;
+    EXEC #Reg @id = 6, @prueba = 'Tipo: texto que no es fecha en fecha_cierre (DATE)', @esperados = '241,242,295', @patron = NULL, @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -168,15 +168,15 @@ GO
 BEGIN TRY
     BEGIN TRANSACTION;
 
-    UPDATE TOP (1) Estudiante SET nombre = REPLICATE(N'x', 4000);
+    UPDATE TOP (1) Estudiante SET nombre = REPLICATE('x', 4000);
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 7, @prueba = N'Tipo: texto demasiado largo en nombre', @esperados = N'8152,2628', @patron = NULL, @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 7, @prueba = 'Tipo: texto demasiado largo en nombre', @esperados = '8152,2628', @patron = NULL, @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 7, @prueba = N'Tipo: texto demasiado largo en nombre', @esperados = N'8152,2628', @patron = NULL, @num = @n, @msg = @m;
+    EXEC #Reg @id = 7, @prueba = 'Tipo: texto demasiado largo en nombre', @esperados = '8152,2628', @patron = NULL, @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -187,12 +187,12 @@ BEGIN TRY
     UPDATE TOP (1) Estudiante_Competencia SET nivel_declarado = 4;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 8, @prueba = N'Rango: nivel_declarado 4', @esperados = N'547', @patron = N'%CK_EstudianteCompetencia_Nivel%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 8, @prueba = 'Rango: nivel_declarado 4', @esperados = '547', @patron = '%CK_EstudianteCompetencia_Nivel%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 8, @prueba = N'Rango: nivel_declarado 4', @esperados = N'547', @patron = N'%CK_EstudianteCompetencia_Nivel%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 8, @prueba = 'Rango: nivel_declarado 4', @esperados = '547', @patron = '%CK_EstudianteCompetencia_Nivel%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -203,12 +203,12 @@ BEGIN TRY
     UPDATE TOP (1) Estudiante_Competencia SET nivel_declarado = 0;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 9, @prueba = N'Rango: nivel_declarado 0', @esperados = N'547', @patron = N'%CK_EstudianteCompetencia_Nivel%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 9, @prueba = 'Rango: nivel_declarado 0', @esperados = '547', @patron = '%CK_EstudianteCompetencia_Nivel%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 9, @prueba = N'Rango: nivel_declarado 0', @esperados = N'547', @patron = N'%CK_EstudianteCompetencia_Nivel%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 9, @prueba = 'Rango: nivel_declarado 0', @esperados = '547', @patron = '%CK_EstudianteCompetencia_Nivel%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -219,12 +219,12 @@ BEGIN TRY
     UPDATE TOP (1) Oferta_Competencia SET nivel_requerido = 4;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 10, @prueba = N'Rango: nivel_requerido 4', @esperados = N'547', @patron = N'%CK_OfertaCompetencia_Nivel%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 10, @prueba = 'Rango: nivel_requerido 4', @esperados = '547', @patron = '%CK_OfertaCompetencia_Nivel%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 10, @prueba = N'Rango: nivel_requerido 4', @esperados = N'547', @patron = N'%CK_OfertaCompetencia_Nivel%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 10, @prueba = 'Rango: nivel_requerido 4', @esperados = '547', @patron = '%CK_OfertaCompetencia_Nivel%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -235,12 +235,12 @@ BEGIN TRY
     UPDATE TOP (1) Evaluacion SET puntaje_desempeno = 6;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 11, @prueba = N'Rango: puntaje_desempeno 6', @esperados = N'547', @patron = N'%CK_Evaluacion_Desempeno%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 11, @prueba = 'Rango: puntaje_desempeno 6', @esperados = '547', @patron = '%CK_Evaluacion_Desempeno%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 11, @prueba = N'Rango: puntaje_desempeno 6', @esperados = N'547', @patron = N'%CK_Evaluacion_Desempeno%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 11, @prueba = 'Rango: puntaje_desempeno 6', @esperados = '547', @patron = '%CK_Evaluacion_Desempeno%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -251,12 +251,12 @@ BEGIN TRY
     UPDATE TOP (1) Evaluacion SET puntaje_satisfaccion = 6;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 12, @prueba = N'Rango: puntaje_satisfaccion 6', @esperados = N'547', @patron = N'%CK_Evaluacion_Satisfaccion%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 12, @prueba = 'Rango: puntaje_satisfaccion 6', @esperados = '547', @patron = '%CK_Evaluacion_Satisfaccion%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 12, @prueba = N'Rango: puntaje_satisfaccion 6', @esperados = N'547', @patron = N'%CK_Evaluacion_Satisfaccion%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 12, @prueba = 'Rango: puntaje_satisfaccion 6', @esperados = '547', @patron = '%CK_Evaluacion_Satisfaccion%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -267,12 +267,12 @@ BEGIN TRY
     UPDATE TOP (1) Practica SET horas_semanales = 60;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 13, @prueba = N'Rango: horas_semanales 60', @esperados = N'547', @patron = N'%CK_Practica_Horas%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 13, @prueba = 'Rango: horas_semanales 60', @esperados = '547', @patron = '%CK_Practica_Horas%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 13, @prueba = N'Rango: horas_semanales 60', @esperados = N'547', @patron = N'%CK_Practica_Horas%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 13, @prueba = 'Rango: horas_semanales 60', @esperados = '547', @patron = '%CK_Practica_Horas%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -283,12 +283,12 @@ BEGIN TRY
     UPDATE TOP (1) Practica SET horas_semanales = 0;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 14, @prueba = N'Rango: horas_semanales 0', @esperados = N'547', @patron = N'%CK_Practica_Horas%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 14, @prueba = 'Rango: horas_semanales 0', @esperados = '547', @patron = '%CK_Practica_Horas%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 14, @prueba = N'Rango: horas_semanales 0', @esperados = N'547', @patron = N'%CK_Practica_Horas%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 14, @prueba = 'Rango: horas_semanales 0', @esperados = '547', @patron = '%CK_Practica_Horas%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -299,12 +299,12 @@ BEGIN TRY
     UPDATE TOP (1) Oferta SET vacantes = 0;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 15, @prueba = N'Rango: vacantes 0', @esperados = N'547', @patron = N'%CK_Oferta_Vacantes%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 15, @prueba = 'Rango: vacantes 0', @esperados = '547', @patron = '%CK_Oferta_Vacantes%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 15, @prueba = N'Rango: vacantes 0', @esperados = N'547', @patron = N'%CK_Oferta_Vacantes%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 15, @prueba = 'Rango: vacantes 0', @esperados = '547', @patron = '%CK_Oferta_Vacantes%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -315,12 +315,12 @@ BEGIN TRY
     UPDATE TOP (1) Oferta SET vacantes = -1;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 16, @prueba = N'Rango: vacantes -1', @esperados = N'547', @patron = N'%CK_Oferta_Vacantes%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 16, @prueba = 'Rango: vacantes -1', @esperados = '547', @patron = '%CK_Oferta_Vacantes%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 16, @prueba = N'Rango: vacantes -1', @esperados = N'547', @patron = N'%CK_Oferta_Vacantes%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 16, @prueba = 'Rango: vacantes -1', @esperados = '547', @patron = '%CK_Oferta_Vacantes%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -331,12 +331,12 @@ BEGIN TRY
     UPDATE TOP (1) Estudiante_Carrera SET anio_ingreso = 1800;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 17, @prueba = N'Rango: anio_ingreso 1800 en Estudiante_Carrera', @esperados = N'547', @patron = N'%anio_ingreso%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 17, @prueba = 'Rango: anio_ingreso 1800 en Estudiante_Carrera', @esperados = '547', @patron = '%anio_ingreso%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 17, @prueba = N'Rango: anio_ingreso 1800 en Estudiante_Carrera', @esperados = N'547', @patron = N'%anio_ingreso%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 17, @prueba = 'Rango: anio_ingreso 1800 en Estudiante_Carrera', @esperados = '547', @patron = '%anio_ingreso%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -344,15 +344,15 @@ GO
 BEGIN TRY
     BEGIN TRANSACTION;
 
-    UPDATE TOP (1) Postulacion SET estado = N'INEXISTENTE';
+    UPDATE TOP (1) Postulacion SET estado = 'INEXISTENTE';
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 18, @prueba = N'Dominio: estado de postulacion inexistente', @esperados = N'547', @patron = N'%CK_Postulacion_Estado%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 18, @prueba = 'Dominio: estado de postulacion inexistente', @esperados = '547', @patron = '%CK_Postulacion_Estado%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 18, @prueba = N'Dominio: estado de postulacion inexistente', @esperados = N'547', @patron = N'%CK_Postulacion_Estado%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 18, @prueba = 'Dominio: estado de postulacion inexistente', @esperados = '547', @patron = '%CK_Postulacion_Estado%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -360,15 +360,15 @@ GO
 BEGIN TRY
     BEGIN TRANSACTION;
 
-    UPDATE TOP (1) Oferta SET estado = N'INEXISTENTE' WHERE fecha_publicacion IS NOT NULL;
+    UPDATE TOP (1) Oferta SET estado = 'INEXISTENTE' WHERE fecha_publicacion IS NOT NULL;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 19, @prueba = N'Dominio: estado de oferta inexistente', @esperados = N'547', @patron = N'%CK_Oferta_Estado%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 19, @prueba = 'Dominio: estado de oferta inexistente', @esperados = '547', @patron = '%CK_Oferta_Estado%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 19, @prueba = N'Dominio: estado de oferta inexistente', @esperados = N'547', @patron = N'%CK_Oferta_Estado%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 19, @prueba = 'Dominio: estado de oferta inexistente', @esperados = '547', @patron = '%CK_Oferta_Estado%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -376,15 +376,15 @@ GO
 BEGIN TRY
     BEGIN TRANSACTION;
 
-    UPDATE TOP (1) Estudiante_Carrera SET estado = N'X';
+    UPDATE TOP (1) Estudiante_Carrera SET estado = 'X';
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 20, @prueba = N'Dominio: estado de Estudiante_Carrera inexistente', @esperados = N'547', @patron = N'%Estado%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 20, @prueba = 'Dominio: estado de Estudiante_Carrera inexistente', @esperados = '547', @patron = '%Estado%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 20, @prueba = N'Dominio: estado de Estudiante_Carrera inexistente', @esperados = N'547', @patron = N'%Estado%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 20, @prueba = 'Dominio: estado de Estudiante_Carrera inexistente', @esperados = '547', @patron = '%Estado%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -392,15 +392,15 @@ GO
 BEGIN TRY
     BEGIN TRANSACTION;
 
-    UPDATE TOP (1) Oferta_Carrera SET pertinencia = N'X';
+    UPDATE TOP (1) Oferta_Carrera SET pertinencia = 'X';
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 21, @prueba = N'Dominio: pertinencia ''X''', @esperados = N'547', @patron = N'%pertinencia%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 21, @prueba = 'Dominio: pertinencia ''X''', @esperados = '547', @patron = '%pertinencia%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 21, @prueba = N'Dominio: pertinencia ''X''', @esperados = N'547', @patron = N'%pertinencia%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 21, @prueba = 'Dominio: pertinencia ''X''', @esperados = '547', @patron = '%pertinencia%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -408,15 +408,15 @@ GO
 BEGIN TRY
     BEGIN TRANSACTION;
 
-    UPDATE TOP (1) Postulacion SET origen = N'X';
+    UPDATE TOP (1) Postulacion SET origen = 'X';
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 22, @prueba = N'Dominio: origen de postulacion ''X''', @esperados = N'547', @patron = N'%origen%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 22, @prueba = 'Dominio: origen de postulacion ''X''', @esperados = '547', @patron = '%origen%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 22, @prueba = N'Dominio: origen de postulacion ''X''', @esperados = N'547', @patron = N'%origen%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 22, @prueba = 'Dominio: origen de postulacion ''X''', @esperados = '547', @patron = '%origen%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -424,15 +424,15 @@ GO
 BEGIN TRY
     BEGIN TRANSACTION;
 
-    UPDATE TOP (1) Entrevista SET etapa = N'X';
+    UPDATE TOP (1) Entrevista SET etapa = 'X';
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 23, @prueba = N'Dominio: etapa de entrevista ''X''', @esperados = N'547', @patron = N'%etapa%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 23, @prueba = 'Dominio: etapa de entrevista ''X''', @esperados = '547', @patron = '%etapa%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 23, @prueba = N'Dominio: etapa de entrevista ''X''', @esperados = N'547', @patron = N'%etapa%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 23, @prueba = 'Dominio: etapa de entrevista ''X''', @esperados = '547', @patron = '%etapa%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -440,15 +440,15 @@ GO
 BEGIN TRY
     BEGIN TRANSACTION;
 
-    UPDATE TOP (1) Evaluacion SET instancia = N'X';
+    UPDATE TOP (1) Evaluacion SET instancia = 'X';
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 24, @prueba = N'Dominio: instancia de evaluacion ''X''', @esperados = N'547', @patron = N'%instancia%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 24, @prueba = 'Dominio: instancia de evaluacion ''X''', @esperados = '547', @patron = '%instancia%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 24, @prueba = N'Dominio: instancia de evaluacion ''X''', @esperados = N'547', @patron = N'%instancia%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 24, @prueba = 'Dominio: instancia de evaluacion ''X''', @esperados = '547', @patron = '%instancia%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -456,15 +456,15 @@ GO
 BEGIN TRY
     BEGIN TRANSACTION;
 
-    UPDATE TOP (1) Evaluacion SET resultado = N'PRUEBA';
+    UPDATE TOP (1) Evaluacion SET resultado = 'PRUEBA';
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 25, @prueba = N'Dominio: resultado de evaluacion ''PRUEBA''', @esperados = N'547', @patron = N'%resultado%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 25, @prueba = 'Dominio: resultado de evaluacion ''PRUEBA''', @esperados = '547', @patron = '%resultado%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 25, @prueba = N'Dominio: resultado de evaluacion ''PRUEBA''', @esperados = N'547', @patron = N'%resultado%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 25, @prueba = 'Dominio: resultado de evaluacion ''PRUEBA''', @esperados = '547', @patron = '%resultado%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -472,15 +472,15 @@ GO
 BEGIN TRY
     BEGIN TRANSACTION;
 
-    UPDATE TOP (1) Practica SET estado = N'FINALIZADA', fecha_fin_real = NULL;
+    UPDATE TOP (1) Practica SET estado = 'FINALIZADA', fecha_fin_real = NULL;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 26, @prueba = N'Coherencia: practica FINALIZADA sin fecha_fin_real', @esperados = N'547', @patron = N'%CK_Practica%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 26, @prueba = 'Coherencia: practica FINALIZADA sin fecha_fin_real', @esperados = '547', @patron = '%CK_Practica%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 26, @prueba = N'Coherencia: practica FINALIZADA sin fecha_fin_real', @esperados = N'547', @patron = N'%CK_Practica%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 26, @prueba = 'Coherencia: practica FINALIZADA sin fecha_fin_real', @esperados = '547', @patron = '%CK_Practica%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -488,15 +488,15 @@ GO
 BEGIN TRY
     BEGIN TRANSACTION;
 
-    UPDATE TOP (1) Oferta SET estado = N'PUBLICADA', fecha_publicacion = NULL;
+    UPDATE TOP (1) Oferta SET estado = 'PUBLICADA', fecha_publicacion = NULL;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 27, @prueba = N'Coherencia: oferta PUBLICADA sin fecha_publicacion', @esperados = N'547', @patron = N'%CK_Oferta%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 27, @prueba = 'Coherencia: oferta PUBLICADA sin fecha_publicacion', @esperados = '547', @patron = '%CK_Oferta%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 27, @prueba = N'Coherencia: oferta PUBLICADA sin fecha_publicacion', @esperados = N'547', @patron = N'%CK_Oferta%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 27, @prueba = 'Coherencia: oferta PUBLICADA sin fecha_publicacion', @esperados = '547', @patron = '%CK_Oferta%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -505,16 +505,16 @@ BEGIN TRY
     BEGIN TRANSACTION;
 
     DECLARE @p INT = (SELECT TOP (1) id_practica FROM Practica);
-    IF @p IS NULL THROW 59999, N'Sin datos para armar la prueba.', 1;
-    INSERT INTO Historial_Practica (id_practica, estado_nuevo) VALUES (@p, N'INEXISTENTE');
+    IF @p IS NULL THROW 59999, 'Sin datos para armar la prueba.', 1;
+    INSERT INTO Historial_Practica (id_practica, estado_nuevo) VALUES (@p, 'INEXISTENTE');
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 28, @prueba = N'Dominio: estado_nuevo de Historial_Practica inexistente', @esperados = N'547', @patron = N'%Historial%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 28, @prueba = 'Dominio: estado_nuevo de Historial_Practica inexistente', @esperados = '547', @patron = '%Historial%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 28, @prueba = N'Dominio: estado_nuevo de Historial_Practica inexistente', @esperados = N'547', @patron = N'%Historial%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 28, @prueba = 'Dominio: estado_nuevo de Historial_Practica inexistente', @esperados = '547', @patron = '%Historial%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -525,12 +525,12 @@ BEGIN TRY
     UPDATE TOP (1) Oferta SET titulo = NULL;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 29, @prueba = N'NULL: titulo de oferta', @esperados = N'515', @patron = N'%titulo%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 29, @prueba = 'NULL: titulo de oferta', @esperados = '515', @patron = '%titulo%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 29, @prueba = N'NULL: titulo de oferta', @esperados = N'515', @patron = N'%titulo%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 29, @prueba = 'NULL: titulo de oferta', @esperados = '515', @patron = '%titulo%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -541,12 +541,12 @@ BEGIN TRY
     UPDATE TOP (1) Estudiante SET nombre = NULL;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 30, @prueba = N'NULL: nombre de estudiante', @esperados = N'515', @patron = N'%nombre%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 30, @prueba = 'NULL: nombre de estudiante', @esperados = '515', @patron = '%nombre%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 30, @prueba = N'NULL: nombre de estudiante', @esperados = N'515', @patron = N'%nombre%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 30, @prueba = 'NULL: nombre de estudiante', @esperados = '515', @patron = '%nombre%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -555,16 +555,16 @@ BEGIN TRY
     BEGIN TRANSACTION;
 
     INSERT INTO Estudiante (legajo, nombre, apellido, email)
-    SELECT TOP (1) legajo, N'Prueba', N'Duplicado', N'prueba.duplicado@universidad.edu'
+    SELECT TOP (1) legajo, 'Prueba', 'Duplicado', 'prueba.duplicado@universidad.edu'
     FROM Estudiante;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 31, @prueba = N'UQ: legajo repetido', @esperados = N'2627,2601', @patron = N'%UQ_Estudiante_Legajo%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 31, @prueba = 'UQ: legajo repetido', @esperados = '2627,2601', @patron = '%UQ_Estudiante_Legajo%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 31, @prueba = N'UQ: legajo repetido', @esperados = N'2627,2601', @patron = N'%UQ_Estudiante_Legajo%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 31, @prueba = 'UQ: legajo repetido', @esperados = '2627,2601', @patron = '%UQ_Estudiante_Legajo%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -573,16 +573,16 @@ BEGIN TRY
     BEGIN TRANSACTION;
 
     INSERT INTO Postulacion (id_estudiante, id_oferta, id_carrera, estado, origen)
-    SELECT TOP (1) id_estudiante, id_oferta, id_carrera, N'RECIBIDA', N'CV'
+    SELECT TOP (1) id_estudiante, id_oferta, id_carrera, 'RECIBIDA', 'CV'
     FROM Postulacion;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 32, @prueba = N'UQ: postulacion duplicada (estudiante, oferta)', @esperados = N'2627,2601', @patron = N'%UQ_Postulacion_Estudiante_Oferta%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 32, @prueba = 'UQ: postulacion duplicada (estudiante, oferta)', @esperados = '2627,2601', @patron = '%UQ_Postulacion_Estudiante_Oferta%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 32, @prueba = N'UQ: postulacion duplicada (estudiante, oferta)', @esperados = N'2627,2601', @patron = N'%UQ_Postulacion_Estudiante_Oferta%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 32, @prueba = 'UQ: postulacion duplicada (estudiante, oferta)', @esperados = '2627,2601', @patron = '%UQ_Postulacion_Estudiante_Oferta%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -591,16 +591,16 @@ BEGIN TRY
     BEGIN TRANSACTION;
 
     INSERT INTO Evaluacion (id_practica, tipo_evaluador, instancia, resultado)
-    SELECT TOP (1) id_practica, tipo_evaluador, instancia, N'SATISFACTORIA'
+    SELECT TOP (1) id_practica, tipo_evaluador, instancia, 'SATISFACTORIA'
     FROM Evaluacion;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 33, @prueba = N'UQ: evaluacion repetida (practica, evaluador, instancia)', @esperados = N'2627,2601', @patron = N'%UQ_Evaluacion%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 33, @prueba = 'UQ: evaluacion repetida (practica, evaluador, instancia)', @esperados = '2627,2601', @patron = '%UQ_Evaluacion%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 33, @prueba = N'UQ: evaluacion repetida (practica, evaluador, instancia)', @esperados = N'2627,2601', @patron = N'%UQ_Evaluacion%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 33, @prueba = 'UQ: evaluacion repetida (practica, evaluador, instancia)', @esperados = '2627,2601', @patron = '%UQ_Evaluacion%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -613,12 +613,12 @@ BEGIN TRY
     FROM Estudiante_Carrera;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 34, @prueba = N'PK: Estudiante_Carrera repetida', @esperados = N'2627,2601', @patron = N'%Estudiante_Carrera%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 34, @prueba = 'PK: Estudiante_Carrera repetida', @esperados = '2627,2601', @patron = '%Estudiante_Carrera%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 34, @prueba = N'PK: Estudiante_Carrera repetida', @esperados = N'2627,2601', @patron = N'%Estudiante_Carrera%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 34, @prueba = 'PK: Estudiante_Carrera repetida', @esperados = '2627,2601', @patron = '%Estudiante_Carrera%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -630,16 +630,16 @@ BEGIN TRY
     SELECT TOP (1) @o = o.id_oferta, @c = c.id_convenio
     FROM Oferta o
     INNER JOIN Convenio c ON c.id_empresa <> o.id_empresa;
-    IF @o IS NULL THROW 59999, N'Sin datos para armar la prueba.', 1;
+    IF @o IS NULL THROW 59999, 'Sin datos para armar la prueba.', 1;
     UPDATE Oferta SET id_convenio = @c WHERE id_oferta = @o;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 35, @prueba = N'FK: convenio de otra empresa en una oferta', @esperados = N'547', @patron = N'%FK_Oferta_Convenio_Empresa%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 35, @prueba = 'FK: convenio de otra empresa en una oferta', @esperados = '547', @patron = '%FK_Oferta_Convenio_Empresa%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 35, @prueba = N'FK: convenio de otra empresa en una oferta', @esperados = N'547', @patron = N'%FK_Oferta_Convenio_Empresa%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 35, @prueba = 'FK: convenio de otra empresa en una oferta', @esperados = '547', @patron = '%FK_Oferta_Convenio_Empresa%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -652,12 +652,12 @@ BEGIN TRY
     FROM Competencia;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 36, @prueba = N'FK: estudiante inexistente en Estudiante_Competencia', @esperados = N'547', @patron = N'%FK_EstudianteCompetencia_Estudiante%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 36, @prueba = 'FK: estudiante inexistente en Estudiante_Competencia', @esperados = '547', @patron = '%FK_EstudianteCompetencia_Estudiante%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 36, @prueba = N'FK: estudiante inexistente en Estudiante_Competencia', @esperados = N'547', @patron = N'%FK_EstudianteCompetencia_Estudiante%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 36, @prueba = 'FK: estudiante inexistente en Estudiante_Competencia', @esperados = '547', @patron = '%FK_EstudianteCompetencia_Estudiante%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -670,17 +670,17 @@ BEGIN TRY
     FROM Estudiante e CROSS JOIN Oferta o CROSS JOIN Carrera c
     WHERE NOT EXISTS (SELECT 1 FROM Postulacion p WHERE p.id_estudiante = e.id_estudiante AND p.id_oferta = o.id_oferta)
       AND NOT EXISTS (SELECT 1 FROM Estudiante_Carrera x WHERE x.id_estudiante = e.id_estudiante AND x.id_carrera = c.id_carrera);
-    IF @e IS NULL THROW 59999, N'Sin datos para armar la prueba.', 1;
+    IF @e IS NULL THROW 59999, 'Sin datos para armar la prueba.', 1;
     INSERT INTO Postulacion (id_estudiante, id_oferta, id_carrera, estado, origen)
-    VALUES (@e, @o, @c, N'RECIBIDA', N'CV');
+    VALUES (@e, @o, @c, 'RECIBIDA', 'CV');
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 37, @prueba = N'FK compuesta: postulacion a carrera que el estudiante no cursa', @esperados = N'547', @patron = N'%Carrera%', @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 37, @prueba = 'FK compuesta: postulacion a carrera que el estudiante no cursa', @esperados = '547', @patron = '%Carrera%', @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 37, @prueba = N'FK compuesta: postulacion a carrera que el estudiante no cursa', @esperados = N'547', @patron = N'%Carrera%', @num = @n, @msg = @m;
+    EXEC #Reg @id = 37, @prueba = 'FK compuesta: postulacion a carrera que el estudiante no cursa', @esperados = '547', @patron = '%Carrera%', @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -689,17 +689,17 @@ BEGIN TRY
     BEGIN TRANSACTION;
 
     DECLARE @p INT = (SELECT TOP (1) id_postulacion FROM Postulacion);
-    IF @p IS NULL THROW 59999, N'Sin datos para armar la prueba.', 1;
-    UPDATE Postulacion SET estado = N'RECHAZADA' WHERE id_postulacion = @p;
-    EXEC usp_CambiarEstadoPostulacion @id_postulacion = @p, @estado_nuevo = N'EN_REVISION', @motivo = N'Prueba transicion ilegal';
+    IF @p IS NULL THROW 59999, 'Sin datos para armar la prueba.', 1;
+    UPDATE Postulacion SET estado = 'RECHAZADA' WHERE id_postulacion = @p;
+    EXEC usp_CambiarEstadoPostulacion @id_postulacion = @p, @estado_nuevo = 'EN_REVISION', @motivo = 'Prueba transicion ilegal';
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 38, @prueba = N'Proc: transicion ilegal RECHAZADA -> EN_REVISION', @esperados = N'50003', @patron = NULL, @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 38, @prueba = 'Proc: transicion ilegal RECHAZADA -> EN_REVISION', @esperados = '50003', @patron = NULL, @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 38, @prueba = N'Proc: transicion ilegal RECHAZADA -> EN_REVISION', @esperados = N'50003', @patron = NULL, @num = @n, @msg = @m;
+    EXEC #Reg @id = 38, @prueba = 'Proc: transicion ilegal RECHAZADA -> EN_REVISION', @esperados = '50003', @patron = NULL, @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -708,17 +708,17 @@ BEGIN TRY
     BEGIN TRANSACTION;
 
     DECLARE @p INT = (SELECT TOP (1) id_postulacion FROM Postulacion);
-    IF @p IS NULL THROW 59999, N'Sin datos para armar la prueba.', 1;
-    UPDATE Postulacion SET estado = N'RECIBIDA' WHERE id_postulacion = @p;
-    EXEC usp_CambiarEstadoPostulacion @id_postulacion = @p, @estado_nuevo = N'SELECCIONADA', @motivo = N'Prueba salto de etapas';
+    IF @p IS NULL THROW 59999, 'Sin datos para armar la prueba.', 1;
+    UPDATE Postulacion SET estado = 'RECIBIDA' WHERE id_postulacion = @p;
+    EXEC usp_CambiarEstadoPostulacion @id_postulacion = @p, @estado_nuevo = 'SELECCIONADA', @motivo = 'Prueba salto de etapas';
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 39, @prueba = N'Proc: transicion ilegal RECIBIDA -> SELECCIONADA (salta etapas)', @esperados = N'50003', @patron = NULL, @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 39, @prueba = 'Proc: transicion ilegal RECIBIDA -> SELECCIONADA (salta etapas)', @esperados = '50003', @patron = NULL, @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 39, @prueba = N'Proc: transicion ilegal RECIBIDA -> SELECCIONADA (salta etapas)', @esperados = N'50003', @patron = NULL, @num = @n, @msg = @m;
+    EXEC #Reg @id = 39, @prueba = 'Proc: transicion ilegal RECIBIDA -> SELECCIONADA (salta etapas)', @esperados = '50003', @patron = NULL, @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -726,15 +726,15 @@ GO
 BEGIN TRY
     BEGIN TRANSACTION;
 
-    EXEC usp_CambiarEstadoPostulacion @id_postulacion = -1, @estado_nuevo = N'EN_REVISION', @motivo = N'Prueba inexistente';
+    EXEC usp_CambiarEstadoPostulacion @id_postulacion = -1, @estado_nuevo = 'EN_REVISION', @motivo = 'Prueba inexistente';
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 40, @prueba = N'Proc: cambiar estado de postulacion inexistente', @esperados = N'50001', @patron = NULL, @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 40, @prueba = 'Proc: cambiar estado de postulacion inexistente', @esperados = '50001', @patron = NULL, @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 40, @prueba = N'Proc: cambiar estado de postulacion inexistente', @esperados = N'50001', @patron = NULL, @num = @n, @msg = @m;
+    EXEC #Reg @id = 40, @prueba = 'Proc: cambiar estado de postulacion inexistente', @esperados = '50001', @patron = NULL, @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -747,21 +747,21 @@ BEGIN TRY
     FROM Estudiante e CROSS JOIN Oferta o CROSS JOIN Carrera c
     WHERE NOT EXISTS (SELECT 1 FROM Postulacion p WHERE p.id_estudiante = e.id_estudiante AND p.id_oferta = o.id_oferta)
       AND NOT EXISTS (SELECT 1 FROM Estudiante_Carrera x WHERE x.id_estudiante = e.id_estudiante AND x.id_carrera = c.id_carrera);
-    IF @e IS NULL THROW 59999, N'Sin datos para armar la prueba.', 1;
+    IF @e IS NULL THROW 59999, 'Sin datos para armar la prueba.', 1;
     UPDATE Oferta
-    SET estado = N'PUBLICADA',
+    SET estado = 'PUBLICADA',
         fecha_publicacion = DATEADD(DAY, -30, CAST(GETDATE() AS date)),
         fecha_cierre = DATEADD(YEAR, 1, CAST(GETDATE() AS date))
     WHERE id_oferta = @o;
-    EXEC usp_RegistrarPostulacion @id_estudiante = @e, @id_oferta = @o, @id_carrera = @c, @origen = N'PORTAL', @observaciones = N'Prueba carrera incorrecta';
+    EXEC usp_RegistrarPostulacion @id_estudiante = @e, @id_oferta = @o, @id_carrera = @c, @origen = 'PORTAL', @observaciones = 'Prueba carrera incorrecta';
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 41, @prueba = N'Proc: postulacion a carrera que no corresponde al estudiante', @esperados = N'50005,547', @patron = NULL, @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 41, @prueba = 'Proc: postulacion a carrera que no corresponde al estudiante', @esperados = '50005,547', @patron = NULL, @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 41, @prueba = N'Proc: postulacion a carrera que no corresponde al estudiante', @esperados = N'50005,547', @patron = NULL, @num = @n, @msg = @m;
+    EXEC #Reg @id = 41, @prueba = 'Proc: postulacion a carrera que no corresponde al estudiante', @esperados = '50005,547', @patron = NULL, @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -773,16 +773,16 @@ BEGIN TRY
     SELECT TOP (1) @e = e.id_estudiante, @mat = m.id_materia
     FROM Estudiante e CROSS JOIN Materia m
     WHERE NOT EXISTS (SELECT 1 FROM Estudiante_Carrera x WHERE x.id_estudiante = e.id_estudiante AND x.id_carrera = m.id_carrera);
-    IF @e IS NULL THROW 59999, N'Sin datos para armar la prueba.', 1;
+    IF @e IS NULL THROW 59999, 'Sin datos para armar la prueba.', 1;
     EXEC usp_RegistrarMateriaAprobada @id_estudiante = @e, @id_materia = @mat, @fecha_aprobacion = @hoy;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 42, @prueba = N'Proc: materia aprobada de una carrera que el estudiante no cursa', @esperados = N'50005', @patron = NULL, @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 42, @prueba = 'Proc: materia aprobada de una carrera que el estudiante no cursa', @esperados = '50005', @patron = NULL, @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 42, @prueba = N'Proc: materia aprobada de una carrera que el estudiante no cursa', @esperados = N'50005', @patron = NULL, @num = @n, @msg = @m;
+    EXEC #Reg @id = 42, @prueba = 'Proc: materia aprobada de una carrera que el estudiante no cursa', @esperados = '50005', @patron = NULL, @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -794,20 +794,20 @@ BEGIN TRY
     SELECT TOP (1) @o = o.id_oferta
     FROM Oferta o
     INNER JOIN Empresa em ON em.id_empresa = o.id_empresa
-    WHERE em.estado_vinculo = N'ACTIVA'
+    WHERE em.estado_vinculo = 'ACTIVA'
       AND EXISTS (SELECT 1 FROM Oferta_Carrera oc WHERE oc.id_oferta = o.id_oferta)
       AND EXISTS (SELECT 1 FROM Oferta_Competencia oc WHERE oc.id_oferta = o.id_oferta);
-    IF @o IS NULL THROW 59999, N'Sin datos para armar la prueba.', 1;
-    UPDATE Oferta SET estado = N'BORRADOR', id_convenio = NULL WHERE id_oferta = @o;
+    IF @o IS NULL THROW 59999, 'Sin datos para armar la prueba.', 1;
+    UPDATE Oferta SET estado = 'BORRADOR', id_convenio = NULL WHERE id_oferta = @o;
     EXEC usp_PublicarOferta @id_oferta = @o;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 43, @prueba = N'Proc: publicar oferta sin convenio', @esperados = N'50006', @patron = NULL, @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 43, @prueba = 'Proc: publicar oferta sin convenio', @esperados = '50006', @patron = NULL, @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 43, @prueba = N'Proc: publicar oferta sin convenio', @esperados = N'50006', @patron = NULL, @num = @n, @msg = @m;
+    EXEC #Reg @id = 43, @prueba = 'Proc: publicar oferta sin convenio', @esperados = '50006', @patron = NULL, @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -817,25 +817,25 @@ BEGIN TRY
 
     DECLARE @p INT, @o INT, @c INT, @e INT;
     SELECT TOP (1) @p = id_postulacion, @o = id_oferta, @c = id_carrera FROM Postulacion;
-    IF @p IS NULL THROW 59999, N'Sin datos para armar la prueba.', 1;
-    UPDATE Postulacion SET estado = N'ENTREVISTA' WHERE id_postulacion = @p;
+    IF @p IS NULL THROW 59999, 'Sin datos para armar la prueba.', 1;
+    UPDATE Postulacion SET estado = 'ENTREVISTA' WHERE id_postulacion = @p;
     UPDATE Oferta SET vacantes = 1 WHERE id_oferta = @o;
     INSERT INTO Estudiante (legajo, nombre, apellido, email)
-    VALUES (CONCAT(N'T-', LEFT(CONVERT(NVARCHAR(36), NEWID()), 8)), N'Prueba', N'Temporal',
-            CONCAT(N'prueba.', LEFT(CONVERT(NVARCHAR(36), NEWID()), 8), N'@universidad.edu'));
+    VALUES (CONCAT('T-', LEFT(CONVERT(VARCHAR(36), NEWID()), 8)), 'Prueba', 'Temporal',
+            CONCAT('prueba.', LEFT(CONVERT(VARCHAR(36), NEWID()), 8), '@universidad.edu'));
     SET @e = SCOPE_IDENTITY();
-    INSERT INTO Estudiante_Carrera (id_estudiante, id_carrera, anio_ingreso, estado) VALUES (@e, @c, 2024, N'ACTIVO');
+    INSERT INTO Estudiante_Carrera (id_estudiante, id_carrera, anio_ingreso, estado) VALUES (@e, @c, 2024, 'ACTIVO');
     INSERT INTO Postulacion (id_estudiante, id_oferta, id_carrera, estado, origen)
-    VALUES (@e, @o, @c, N'SELECCIONADA', N'PORTAL');
-    EXEC usp_CambiarEstadoPostulacion @id_postulacion = @p, @estado_nuevo = N'SELECCIONADA', @motivo = N'Prueba sin vacantes';
+    VALUES (@e, @o, @c, 'SELECCIONADA', 'PORTAL');
+    EXEC usp_CambiarEstadoPostulacion @id_postulacion = @p, @estado_nuevo = 'SELECCIONADA', @motivo = 'Prueba sin vacantes';
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 44, @prueba = N'Proc: seleccionar sin vacantes', @esperados = N'50007', @patron = NULL, @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 44, @prueba = 'Proc: seleccionar sin vacantes', @esperados = '50007', @patron = NULL, @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 44, @prueba = N'Proc: seleccionar sin vacantes', @esperados = N'50007', @patron = NULL, @num = @n, @msg = @m;
+    EXEC #Reg @id = 44, @prueba = 'Proc: seleccionar sin vacantes', @esperados = '50007', @patron = NULL, @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -845,18 +845,18 @@ BEGIN TRY
 
     DECLARE @p INT, @f DATE;
     SELECT TOP (1) @p = id_practica, @f = fecha_inicio FROM Practica;
-    IF @p IS NULL THROW 59999, N'Sin datos para armar la prueba.', 1;
-    UPDATE Practica SET estado = N'EN_CURSO', fecha_fin_real = NULL WHERE id_practica = @p;
-    DELETE FROM Evaluacion WHERE id_practica = @p AND instancia = N'FINAL';
-    EXEC usp_CerrarPractica @id_practica = @p, @fecha_fin_real = @f, @motivo_cierre = N'Prueba sin evaluacion final';
+    IF @p IS NULL THROW 59999, 'Sin datos para armar la prueba.', 1;
+    UPDATE Practica SET estado = 'EN_CURSO', fecha_fin_real = NULL WHERE id_practica = @p;
+    DELETE FROM Evaluacion WHERE id_practica = @p AND instancia = 'FINAL';
+    EXEC usp_CerrarPractica @id_practica = @p, @fecha_fin_real = @f, @motivo_cierre = 'Prueba sin evaluacion final';
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 45, @prueba = N'Proc: cerrar practica sin evaluacion FINAL', @esperados = N'50009', @patron = NULL, @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 45, @prueba = 'Proc: cerrar practica sin evaluacion FINAL', @esperados = '50009', @patron = NULL, @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 45, @prueba = N'Proc: cerrar practica sin evaluacion FINAL', @esperados = N'50009', @patron = NULL, @num = @n, @msg = @m;
+    EXEC #Reg @id = 45, @prueba = 'Proc: cerrar practica sin evaluacion FINAL', @esperados = '50009', @patron = NULL, @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -866,22 +866,22 @@ BEGIN TRY
 
     DECLARE @e INT, @o INT, @c INT;
     SELECT TOP (1) @e = id_estudiante, @o = id_oferta, @c = id_carrera FROM Postulacion;
-    IF @e IS NULL THROW 59999, N'Sin datos para armar la prueba.', 1;
+    IF @e IS NULL THROW 59999, 'Sin datos para armar la prueba.', 1;
     UPDATE Oferta
-    SET estado = N'PUBLICADA',
+    SET estado = 'PUBLICADA',
         fecha_publicacion = DATEADD(DAY, -30, CAST(GETDATE() AS date)),
         fecha_cierre = DATEADD(YEAR, 1, CAST(GETDATE() AS date))
     WHERE id_oferta = @o;
-    UPDATE Estudiante_Carrera SET estado = N'ACTIVO' WHERE id_estudiante = @e AND id_carrera = @c;
-    EXEC usp_RegistrarPostulacion @id_estudiante = @e, @id_oferta = @o, @id_carrera = @c, @origen = N'PORTAL', @observaciones = N'Prueba duplicada';
+    UPDATE Estudiante_Carrera SET estado = 'ACTIVO' WHERE id_estudiante = @e AND id_carrera = @c;
+    EXEC usp_RegistrarPostulacion @id_estudiante = @e, @id_oferta = @o, @id_carrera = @c, @origen = 'PORTAL', @observaciones = 'Prueba duplicada';
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 46, @prueba = N'Proc: postulacion duplicada', @esperados = N'50010,2627', @patron = NULL, @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 46, @prueba = 'Proc: postulacion duplicada', @esperados = '50010,2627', @patron = NULL, @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 46, @prueba = N'Proc: postulacion duplicada', @esperados = N'50010,2627', @patron = NULL, @num = @n, @msg = @m;
+    EXEC #Reg @id = 46, @prueba = 'Proc: postulacion duplicada', @esperados = '50010,2627', @patron = NULL, @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -891,30 +891,30 @@ BEGIN TRY
 
     DECLARE @o INT, @c INT, @e INT, @p INT;
     SELECT TOP (1) @o = id_oferta, @c = id_carrera FROM Oferta_Carrera;
-    IF @o IS NULL THROW 59999, N'Sin datos para armar la prueba.', 1;
+    IF @o IS NULL THROW 59999, 'Sin datos para armar la prueba.', 1;
     UPDATE Oferta
-    SET estado = N'PUBLICADA',
+    SET estado = 'PUBLICADA',
         fecha_publicacion = DATEADD(DAY, -30, CAST(GETDATE() AS date)),
         fecha_cierre = DATEADD(YEAR, 1, CAST(GETDATE() AS date))
     WHERE id_oferta = @o;
     INSERT INTO Estudiante (legajo, nombre, apellido, email)
-    VALUES (CONCAT(N'T-', LEFT(CONVERT(NVARCHAR(36), NEWID()), 8)), N'Prueba', N'Temporal',
-            CONCAT(N'prueba.', LEFT(CONVERT(NVARCHAR(36), NEWID()), 8), N'@universidad.edu'));
+    VALUES (CONCAT('T-', LEFT(CONVERT(VARCHAR(36), NEWID()), 8)), 'Prueba', 'Temporal',
+            CONCAT('prueba.', LEFT(CONVERT(VARCHAR(36), NEWID()), 8), '@universidad.edu'));
     SET @e = SCOPE_IDENTITY();
     INSERT INTO Estudiante_Carrera (id_estudiante, id_carrera, anio_ingreso, estado)
-    VALUES (@e, @c, 2024, N'ACTIVO');
-    EXEC usp_RegistrarPostulacion @id_estudiante = @e, @id_oferta = @o, @id_carrera = @c, @origen = N'PORTAL', @observaciones = N'Prueba caso feliz';
+    VALUES (@e, @c, 2024, 'ACTIVO');
+    EXEC usp_RegistrarPostulacion @id_estudiante = @e, @id_oferta = @o, @id_carrera = @c, @origen = 'PORTAL', @observaciones = 'Prueba caso feliz';
     SELECT @p = id_postulacion FROM Postulacion WHERE id_estudiante = @e AND id_oferta = @o;
-    IF @p IS NULL OR NOT EXISTS (SELECT 1 FROM Postulacion_Estado_Historial WHERE id_postulacion = @p AND estado_nuevo = N'RECIBIDA')
-        THROW 59998, N'La postulacion o su historial no quedaron registrados.', 1;
+    IF @p IS NULL OR NOT EXISTS (SELECT 1 FROM Postulacion_Estado_Historial WHERE id_postulacion = @p AND estado_nuevo = 'RECIBIDA')
+        THROW 59998, 'La postulacion o su historial no quedaron registrados.', 1;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 47, @prueba = N'Feliz: registrar postulacion y dejar historial', @esperados = NULL, @patron = NULL, @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 47, @prueba = 'Feliz: registrar postulacion y dejar historial', @esperados = NULL, @patron = NULL, @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 47, @prueba = N'Feliz: registrar postulacion y dejar historial', @esperados = NULL, @patron = NULL, @num = @n, @msg = @m;
+    EXEC #Reg @id = 47, @prueba = 'Feliz: registrar postulacion y dejar historial', @esperados = NULL, @patron = NULL, @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -923,21 +923,21 @@ BEGIN TRY
     BEGIN TRANSACTION;
 
     DECLARE @p INT = (SELECT TOP (1) id_postulacion FROM Postulacion);
-    IF @p IS NULL THROW 59999, N'Sin datos para armar la prueba.', 1;
-    UPDATE Postulacion SET estado = N'RECIBIDA' WHERE id_postulacion = @p;
+    IF @p IS NULL THROW 59999, 'Sin datos para armar la prueba.', 1;
+    UPDATE Postulacion SET estado = 'RECIBIDA' WHERE id_postulacion = @p;
     DECLARE @antes INT = (SELECT COUNT(*) FROM Postulacion_Estado_Historial WHERE id_postulacion = @p);
-    EXEC usp_CambiarEstadoPostulacion @id_postulacion = @p, @estado_nuevo = N'EN_REVISION', @motivo = N'Prueba caso feliz';
-    IF NOT EXISTS (SELECT 1 FROM Postulacion WHERE id_postulacion = @p AND estado = N'EN_REVISION')
+    EXEC usp_CambiarEstadoPostulacion @id_postulacion = @p, @estado_nuevo = 'EN_REVISION', @motivo = 'Prueba caso feliz';
+    IF NOT EXISTS (SELECT 1 FROM Postulacion WHERE id_postulacion = @p AND estado = 'EN_REVISION')
        OR (SELECT COUNT(*) FROM Postulacion_Estado_Historial WHERE id_postulacion = @p) <> @antes + 1
-        THROW 59998, N'El estado o el historial no se actualizaron.', 1;
+        THROW 59998, 'El estado o el historial no se actualizaron.', 1;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 48, @prueba = N'Feliz: transicion legal RECIBIDA -> EN_REVISION', @esperados = NULL, @patron = NULL, @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 48, @prueba = 'Feliz: transicion legal RECIBIDA -> EN_REVISION', @esperados = NULL, @patron = NULL, @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 48, @prueba = N'Feliz: transicion legal RECIBIDA -> EN_REVISION', @esperados = NULL, @patron = NULL, @num = @n, @msg = @m;
+    EXEC #Reg @id = 48, @prueba = 'Feliz: transicion legal RECIBIDA -> EN_REVISION', @esperados = NULL, @patron = NULL, @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -947,26 +947,26 @@ BEGIN TRY
 
     DECLARE @p INT, @f DATE;
     SELECT TOP (1) @p = id_practica, @f = fecha_inicio FROM Practica;
-    IF @p IS NULL THROW 59999, N'Sin datos para armar la prueba.', 1;
-    UPDATE Practica SET estado = N'EN_CURSO', fecha_fin_real = NULL WHERE id_practica = @p;
-    DELETE FROM Evaluacion WHERE id_practica = @p AND instancia = N'FINAL';
+    IF @p IS NULL THROW 59999, 'Sin datos para armar la prueba.', 1;
+    UPDATE Practica SET estado = 'EN_CURSO', fecha_fin_real = NULL WHERE id_practica = @p;
+    DELETE FROM Evaluacion WHERE id_practica = @p AND instancia = 'FINAL';
     INSERT INTO Evaluacion (id_practica, tipo_evaluador, instancia, resultado)
-    VALUES (@p, N'ESTUDIANTE', N'FINAL', N'SATISFACTORIA'), (@p, N'EMPRESA', N'FINAL', N'SATISFACTORIA');
+    VALUES (@p, 'ESTUDIANTE', 'FINAL', 'SATISFACTORIA'), (@p, 'EMPRESA', 'FINAL', 'SATISFACTORIA');
     IF NOT EXISTS (SELECT 1 FROM Seguimiento WHERE id_practica = @p)
         INSERT INTO Seguimiento (id_practica, tipo_seguimiento, origen_feedback, estado_seguimiento, observaciones)
-        VALUES (@p, N'CIERRE', N'AMBOS', N'SIN_NOVEDADES', N'Prueba caso feliz');
-    EXEC usp_CerrarPractica @id_practica = @p, @fecha_fin_real = @f, @motivo_cierre = N'Prueba caso feliz';
-    IF NOT EXISTS (SELECT 1 FROM Practica WHERE id_practica = @p AND estado = N'FINALIZADA' AND fecha_fin_real IS NOT NULL)
-       OR NOT EXISTS (SELECT 1 FROM Historial_Practica WHERE id_practica = @p AND estado_nuevo = N'FINALIZADA')
-        THROW 59998, N'La practica no quedo FINALIZADA con su historial.', 1;
+        VALUES (@p, 'CIERRE', 'AMBOS', 'SIN_NOVEDADES', 'Prueba caso feliz');
+    EXEC usp_CerrarPractica @id_practica = @p, @fecha_fin_real = @f, @motivo_cierre = 'Prueba caso feliz';
+    IF NOT EXISTS (SELECT 1 FROM Practica WHERE id_practica = @p AND estado = 'FINALIZADA' AND fecha_fin_real IS NOT NULL)
+       OR NOT EXISTS (SELECT 1 FROM Historial_Practica WHERE id_practica = @p AND estado_nuevo = 'FINALIZADA')
+        THROW 59998, 'La practica no quedo FINALIZADA con su historial.', 1;
 
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 49, @prueba = N'Feliz: cerrar practica con seguimiento y evaluaciones FINAL', @esperados = NULL, @patron = NULL, @num = NULL, @msg = NULL;
+    EXEC #Reg @id = 49, @prueba = 'Feliz: cerrar practica con seguimiento y evaluaciones FINAL', @esperados = NULL, @patron = NULL, @num = NULL, @msg = NULL;
 END TRY
 BEGIN CATCH
-    DECLARE @n INT = ERROR_NUMBER(), @m NVARCHAR(4000) = ERROR_MESSAGE();
+    DECLARE @n INT = ERROR_NUMBER(), @m VARCHAR(4000) = ERROR_MESSAGE();
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    EXEC #Reg @id = 49, @prueba = N'Feliz: cerrar practica con seguimiento y evaluaciones FINAL', @esperados = NULL, @patron = NULL, @num = @n, @msg = @m;
+    EXEC #Reg @id = 49, @prueba = 'Feliz: cerrar practica con seguimiento y evaluaciones FINAL', @esperados = NULL, @patron = NULL, @num = @n, @msg = @m;
 END CATCH;
 GO
 
@@ -986,15 +986,15 @@ DECLARE @dif INT = (
     WHERE a.filas <> c.filas
 );
 
-SELECT id AS prueba, CASE WHEN ok = 1 THEN N'OK' ELSE N'FALLA' END AS resultado, prueba AS descripcion, detalle
+SELECT id AS prueba, CASE WHEN ok = 1 THEN 'OK' ELSE 'FALLA' END AS resultado, prueba AS descripcion, detalle
 FROM #Resultado
 ORDER BY id;
 
 DECLARE @total INT = (SELECT COUNT(*) FROM #Resultado),
         @ok INT = (SELECT COUNT(*) FROM #Resultado WHERE ok = 1);
-PRINT CONCAT(N'Pruebas: ', @total, N' | OK: ', @ok, N' | FALLA: ', @total - @ok);
-PRINT CONCAT(N'Transacciones abiertas: ', @pend, N' | Tablas con filas distintas a las iniciales: ', @dif,
-             N' (ambos deben ser 0; los huecos de IDENTITY por el ROLLBACK son esperables)');
+PRINT CONCAT('Pruebas: ', @total, ' | OK: ', @ok, ' | FALLA: ', @total - @ok);
+PRINT CONCAT('Transacciones abiertas: ', @pend, ' | Tablas con filas distintas a las iniciales: ', @dif,
+             ' (ambos deben ser 0; los huecos de IDENTITY por el ROLLBACK son esperables)');
 
 DROP TABLE #Resultado;
 DROP TABLE #Conteo;
