@@ -801,22 +801,6 @@ BEGIN
     END;
     IF NOT EXISTS (
         SELECT 1 FROM Estudiante_Carrera
-        WHERE id_estudiante = @id_estudiante AND id_carrera = @id_carrera
-    )
-    BEGIN
-        PRINT 'El estudiante no cursa esa carrera.';
-        RETURN;
-    END;
-    IF NOT EXISTS (
-        SELECT 1 FROM Oferta_Carrera
-        WHERE id_oferta = @id_oferta AND id_carrera = @id_carrera
-    )
-    BEGIN
-        PRINT 'La oferta no está dirigida a esa carrera.';
-        RETURN;
-    END;
-    IF NOT EXISTS (
-        SELECT 1 FROM Estudiante_Carrera
         WHERE id_estudiante = @id_estudiante
           AND id_carrera = @id_carrera
           AND estado = 'ACTIVO'
@@ -833,14 +817,6 @@ BEGIN
     )
     BEGIN
         PRINT 'La oferta no admite postulaciones.';
-        RETURN;
-    END;
-    IF EXISTS (
-        SELECT 1 FROM Postulacion
-        WHERE id_estudiante = @id_estudiante AND id_oferta = @id_oferta
-    )
-    BEGIN
-        PRINT 'El estudiante ya se postuló a esa oferta.';
         RETURN;
     END;
 
@@ -1094,16 +1070,6 @@ BEGIN
         PRINT 'El estudiante no está ACTIVO en la carrera de la postulación.';
         RETURN;
     END;
-    IF @fecha_inicio IS NULL OR @fecha_fin_prevista IS NULL
-    BEGIN
-        PRINT 'Las fechas de la práctica son obligatorias.';
-        RETURN;
-    END;
-    IF @fecha_fin_prevista < @fecha_inicio
-    BEGIN
-        PRINT 'La fecha de fin prevista es anterior al inicio.';
-        RETURN;
-    END;
     IF NOT EXISTS (
         SELECT 1
         FROM Postulacion p
@@ -1113,30 +1079,12 @@ BEGIN
            AND c.id_empresa = o.id_empresa
         WHERE p.id_postulacion = @id_postulacion
           AND c.estado = 'VIGENTE'
-    )
-    BEGIN
-        PRINT 'La oferta no tiene un convenio vigente.';
-        RETURN;
-    END;
-    -- La práctica completa tiene que quedar dentro del convenio.
-    IF NOT EXISTS (
-        SELECT 1
-        FROM Postulacion p
-        INNER JOIN Oferta o ON o.id_oferta = p.id_oferta
-        INNER JOIN Convenio c
-            ON c.id_convenio = o.id_convenio
-           AND c.id_empresa = o.id_empresa
-        WHERE p.id_postulacion = @id_postulacion
+          -- La práctica completa tiene que quedar dentro del convenio.
           AND c.fecha_inicio <= @fecha_inicio
           AND (c.fecha_fin IS NULL OR c.fecha_fin >= @fecha_fin_prevista)
     )
     BEGIN
-        PRINT 'La práctica no queda dentro del período del convenio.';
-        RETURN;
-    END;
-    IF EXISTS (SELECT 1 FROM Practica WHERE id_postulacion = @id_postulacion)
-    BEGIN
-        PRINT 'La postulación ya tiene una práctica.';
+        PRINT 'La oferta no tiene un convenio vigente que cubra las fechas de la práctica.';
         RETURN;
     END;
     -- Sin prácticas simultáneas del mismo estudiante.
@@ -1305,9 +1253,8 @@ BEGIN
     SET NOCOUNT ON;
 
     DECLARE @estado VARCHAR(15);
-    DECLARE @fecha_inicio DATE;
 
-    SELECT @estado = estado, @fecha_inicio = fecha_inicio
+    SELECT @estado = estado
     FROM Practica
     WHERE id_practica = @id_practica;
 
@@ -1319,16 +1266,6 @@ BEGIN
     IF @estado <> 'EN_CURSO'
     BEGIN
         PRINT 'Solo se cierra una práctica EN_CURSO.';
-        RETURN;
-    END;
-    IF @fecha_fin_real IS NULL
-    BEGIN
-        PRINT 'La fecha de fin real es obligatoria.';
-        RETURN;
-    END;
-    IF @fecha_fin_real < @fecha_inicio
-    BEGIN
-        PRINT 'La fecha de fin real es anterior al inicio.';
         RETURN;
     END;
     IF NOT EXISTS (SELECT 1 FROM Seguimiento WHERE id_practica = @id_practica)
@@ -1383,9 +1320,8 @@ BEGIN
     SET NOCOUNT ON;
 
     DECLARE @estado VARCHAR(15);
-    DECLARE @fecha_inicio DATE;
 
-    SELECT @estado = estado, @fecha_inicio = fecha_inicio
+    SELECT @estado = estado
     FROM Practica
     WHERE id_practica = @id_practica;
 
@@ -1399,14 +1335,9 @@ BEGIN
         PRINT 'Solo se interrumpe una práctica PLANIFICADA o EN_CURSO.';
         RETURN;
     END;
-    IF @motivo_cierre IS NULL OR @fecha_fin_real IS NULL
+    IF @motivo_cierre IS NULL
     BEGIN
-        PRINT 'El motivo y la fecha de fin real son obligatorios.';
-        RETURN;
-    END;
-    IF @fecha_fin_real < @fecha_inicio
-    BEGIN
-        PRINT 'La fecha de fin real es anterior al inicio.';
+        PRINT 'El motivo es obligatorio.';
         RETURN;
     END;
 
