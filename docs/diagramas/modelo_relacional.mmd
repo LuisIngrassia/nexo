@@ -1,0 +1,191 @@
+erDiagram
+    direction TB
+    Carrera ||--o{ Materia : "tiene"
+    Estudiante ||--o{ Estudiante_Carrera : "cursa"
+    Carrera ||--o{ Estudiante_Carrera : "inscribe"
+    Estudiante ||--o{ Estudiante_Materia : "aprueba"
+    Materia ||--o{ Estudiante_Materia : "aprobada en"
+    Estudiante ||--o{ Estudiante_Competencia : "declara"
+    Competencia ||--o{ Estudiante_Competencia : "declarada en"
+    Empresa ||--o{ Convenio : "firma"
+    Empresa ||--o{ Oferta : "publica"
+    Convenio |o--o{ Oferta : "enmarca"
+    Oferta ||--o{ Oferta_Carrera : "dirigida a"
+    Carrera ||--o{ Oferta_Carrera : "habilitada en"
+    Oferta ||--o{ Oferta_Competencia : "requiere"
+    Competencia ||--o{ Oferta_Competencia : "requerida en"
+    Estudiante_Carrera ||--o{ Postulacion : "origina"
+    Oferta_Carrera ||--o{ Postulacion : "recibe"
+    Postulacion ||--o{ Postulacion_Estado_Historial : "registra"
+    Postulacion ||--o{ Entrevista : "tiene"
+    Postulacion ||--o| Practica : "genera"
+    Practica ||--o{ Historial_Practica : "registra"
+    Practica ||--o{ Seguimiento : "tiene"
+    Practica ||--o{ Evaluacion : "recibe"
+    Carrera {
+        int id_carrera PK
+        varchar(100) nombre UK
+        varchar(100) unidad_academica
+        varchar(30) plan_estudios UK
+        varchar(30) nivel
+        bit activo
+    }
+    Materia {
+        int id_materia PK
+        int id_carrera FK, UK
+        varchar(20) codigo UK
+        varchar(120) nombre
+        bit activo
+    }
+    Estudiante {
+        int id_estudiante PK
+        varchar(20) legajo UK
+        varchar(50) nombre
+        varchar(50) apellido
+        varchar(100) email UK
+    }
+    Estudiante_Carrera {
+        int id_estudiante PK, FK
+        int id_carrera PK, FK
+        smallint anio_ingreso
+        varchar(10) estado
+    }
+    Estudiante_Materia {
+        int id_estudiante PK, FK
+        int id_materia PK, FK
+        date fecha_aprobacion
+    }
+    Competencia {
+        int id_competencia PK
+        varchar(100) nombre UK
+        varchar(50) categoria
+        varchar(500) descripcion
+        bit activo
+    }
+    Estudiante_Competencia {
+        int id_estudiante PK, FK
+        int id_competencia PK, FK
+        int nivel_declarado
+        datetime fecha_actualizacion
+    }
+    Empresa {
+        int id_empresa PK
+        varchar(20) cuit UK
+        varchar(120) razon_social
+        varchar(80) sector
+        varchar(30) tamano
+        varchar(80) ciudad
+        varchar(15) estado_vinculo
+    }
+    Convenio {
+        int id_convenio PK, UK
+        int id_empresa FK, UK
+        date fecha_inicio
+        date fecha_fin
+        varchar(15) estado
+        varchar(500) objetivo
+        int cupos_referenciales
+    }
+    Oferta {
+        int id_oferta PK
+        int id_empresa FK
+        int id_convenio FK
+        varchar(120) titulo
+        varchar(800) descripcion
+        date fecha_publicacion
+        date fecha_cierre
+        int vacantes
+        varchar(15) modalidad
+        varchar(40) jornada
+        varchar(15) estado
+    }
+    Oferta_Carrera {
+        int id_oferta PK, FK
+        int id_carrera PK, FK
+        varchar(5) pertinencia
+        varchar(300) criterio_pertinencia
+    }
+    Oferta_Competencia {
+        int id_oferta PK, FK
+        int id_competencia PK, FK
+        int nivel_requerido
+        bit obligatoria
+    }
+    Postulacion {
+        int id_postulacion PK
+        int id_estudiante FK, UK
+        int id_oferta FK, UK
+        int id_carrera FK
+        datetime fecha
+        varchar(15) estado
+        varchar(30) origen
+        varchar(500) observaciones
+    }
+    Postulacion_Estado_Historial {
+        int id_historial PK
+        int id_postulacion FK
+        varchar(15) estado_anterior
+        varchar(15) estado_nuevo
+        datetime fecha_cambio
+        varchar(500) motivo
+        varchar(128) usuario
+    }
+    Entrevista {
+        int id_entrevista PK
+        int id_postulacion FK
+        datetime fecha
+        varchar(30) etapa
+        varchar(15) resultado
+        varchar(400) devolucion
+    }
+    Practica {
+        int id_practica PK
+        int id_postulacion FK, UK
+        date fecha_inicio
+        date fecha_fin_prevista
+        date fecha_fin_real
+        int horas_semanales
+        varchar(15) modalidad
+        varchar(15) estado
+        varchar(250) motivo_cierre
+    }
+    Historial_Practica {
+        int id_historial PK
+        int id_practica FK
+        varchar(15) estado_anterior
+        varchar(15) estado_nuevo
+        datetime fecha_cambio
+        varchar(500) motivo
+        varchar(128) usuario
+    }
+    Seguimiento {
+        int id_seguimiento PK
+        int id_practica FK
+        datetime fecha
+        varchar(15) tipo_seguimiento
+        varchar(15) origen_feedback
+        varchar(25) estado_seguimiento
+        varchar(500) observaciones
+        varchar(500) intervencion_facultad
+        date proxima_revision
+    }
+    Evaluacion {
+        int id_evaluacion PK
+        int id_practica FK, UK
+        datetime fecha
+        varchar(15) tipo_evaluador UK
+        varchar(7) instancia UK
+        decimal puntaje_desempeno
+        decimal puntaje_satisfaccion
+        varchar(20) resultado
+        varchar(500) comentarios
+    }
+    Auditoria_Cambios {
+        int id_auditoria PK
+        varchar(50) tabla
+        int id_registro
+        datetime fecha
+        varchar(100) valor_anterior
+        varchar(100) valor_nuevo
+        varchar(128) usuario
+    }

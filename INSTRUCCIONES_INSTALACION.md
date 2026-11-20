@@ -5,7 +5,7 @@
 - Microsoft SQL Server.
 - SQL Server Management Studio.
 - Una conexión con permiso para crear bases de datos.
-- Los archivos de la carpeta `output\sql`.
+- Los archivos de la carpeta `sql`.
 
 ## Conexión
 
@@ -16,47 +16,19 @@
 
 ## Instalación
 
-### Paso 1 Crear la base
+Para cada archivo de la carpeta `sql`, en este orden:
 
-1. Presionar `Ctrl + O`.
-2. Abrir `00_crear_base.sql`.
+1. Presionar `Ctrl + O` y abrir el archivo.
+2. Verificar que la base seleccionada sea `NexoAcademico` (salvo en `00`, que la crea).
 3. Ejecutar con `F5`.
 
-Este archivo crea y selecciona la base `NexoAcademico`. Si la base ya existe, no volver a ejecutarlo.
-
-### Paso 2 Crear la estructura
-
-1. Presionar `Ctrl + O`.
-2. Abrir `01_estructura.sql`.
-3. Verificar que la base seleccionada sea `NexoAcademico`.
-4. Ejecutar con `F5`.
-
-Este archivo crea las tablas, restricciones, vistas, función, procedimientos, triggers e índices.
-
-### Paso 3 Cargar los datos
-
-1. Presionar `Ctrl + O`.
-2. Abrir `02_datos.sql`.
-3. Verificar que la base seleccionada sea `NexoAcademico`.
-4. Ejecutar con `F5`.
-
-Este archivo debe ejecutarse una sola vez. Volver a ejecutarlo produciría registros duplicados.
-
-### Paso 4 Ejecutar las consultas
-
-1. Presionar `Ctrl + O`.
-2. Abrir `03_consultas.sql`.
-3. Ejecutar con `F5`.
-
-Las consultas muestran oportunidades por carrera, competencias solicitadas, estados de postulación, prácticas activas, resultados y brechas de competencias.
-
-### Paso 5 Ejecutar las pruebas
-
-1. Presionar `Ctrl + O`.
-2. Abrir `04_pruebas_integridad.sql`.
-3. Ejecutar con `F5`.
-
-El resultado esperado son seis mensajes que comienzan con `CORRECTO`. Las pruebas revierten sus cambios y no modifican los datos instalados.
+| Archivo | Qué hace |
+|---|---|
+| `00_crear_base.sql` | Crea la base `NexoAcademico`. |
+| `01_estructura.sql` | Crea tablas, restricciones, vistas, función, procedimientos, triggers e índices. |
+| `02_datos.sql` | Carga los datos ficticios. Se ejecuta una sola vez. |
+| `03_consultas.sql` | Ejecuta las 20 consultas de negocio. |
+| `04_pruebas_integridad.sql` | Ejecuta 26 pruebas; se esperan 26 líneas `OK -`. No modifica los datos. |
 
 ## Verificación
 
@@ -76,10 +48,10 @@ SELECT
 
 El resultado esperado es:
 
-- 18 tablas.
+- 20 tablas.
 - 9 vistas.
-- 13 procedimientos.
-- 4 triggers.
+- 14 procedimientos.
+- 2 triggers.
 - 1 función.
 
 Para verificar la cantidad de registros:
@@ -98,16 +70,8 @@ ORDER BY t.name;
 
 Cada tabla debe tener al menos 10 registros.
 
-## Archivos
-
-1. `00_crear_base.sql`: crea la base.
-2. `01_estructura.sql`: crea la estructura.
-3. `02_datos.sql`: carga los datos ficticios.
-4. `03_consultas.sql`: ejecuta las consultas del proyecto.
-5. `04_pruebas_integridad.sql`: comprueba las restricciones.
-
 ## Base existente
 
-Si `NexoAcademico` ya aparece en SQL Server, no ejecutar nuevamente los pasos 1, 2 y 3. Para revisar la instalación existente, ejecutar solamente las consultas y las pruebas.
+Si `NexoAcademico` ya aparece en SQL Server, no ejecutar nuevamente `00`, `01` y `02`. Para revisar la instalación existente, ejecutar solamente las consultas y las pruebas.
 
 No eliminar ni reemplazar una base existente sin realizar antes una copia de seguridad o confirmar que sus datos pueden descartarse.

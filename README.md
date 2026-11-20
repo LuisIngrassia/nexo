@@ -4,13 +4,13 @@ Base de datos en Microsoft SQL Server para gestionar carreras, estudiantes, empr
 
 ## Contenido
 
-- 18 tablas.
+- 20 tablas.
 - 9 vistas.
 - 1 función de compatibilidad.
-- 13 procedimientos almacenados.
-- 4 triggers de auditoría.
-- 14 consultas de negocio.
-- 6 pruebas de integridad.
+- 14 procedimientos almacenados.
+- 2 triggers de auditoría.
+- 20 consultas de negocio.
+- 26 pruebas de integridad.
 - Un mínimo de 10 registros ficticios por tabla.
 
 ## Instalación
