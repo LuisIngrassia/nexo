@@ -28,7 +28,7 @@ Para cada archivo de la carpeta `sql`, en este orden:
 | `01_estructura.sql` | Crea tablas, restricciones, vistas, función, procedimientos, triggers e índices. |
 | `02_datos.sql` | Carga los datos ficticios. Se ejecuta una sola vez. |
 | `03_consultas.sql` | Ejecuta las 20 consultas de negocio. |
-| `04_pruebas_integridad.sql` | Ejecuta 32 pruebas; se esperan 32 líneas `OK -`. No modifica los datos. |
+| `04_pruebas_integridad.sql` | Ejecuta 26 pruebas; se esperan 26 líneas `OK -`. No modifica los datos. |
 
 ## Verificación
 

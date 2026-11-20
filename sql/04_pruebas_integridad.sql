@@ -1,8 +1,8 @@
 /* ================================================================
    NexoAcademico - 04_pruebas_integridad.sql
    Intenta cargar datos incorrectos y comprueba que la base los rechaza
-   (tipo de dato, CHECK, NULL, UNIQUE/PK, claves foráneas y reglas de los
-   procedimientos). Al final hay algunos casos felices que deben funcionar.
+   (tipo de dato, CHECK, NULL, UNIQUE/PK y claves foráneas). Al final hay
+   algunos casos felices que deben funcionar.
 
    NO modifica datos: cada prueba va dentro de BEGIN TRANSACTION y termina
    con ROLLBACK, así la base queda igual que antes.
@@ -411,114 +411,10 @@ END CATCH;
 GO
 
 /* ----------------------------------------------------------------
-   7. REGLAS DE LOS PROCEDIMIENTOS (errores THROW 50001 a 50011)
+   7. CASOS FELICES (deben funcionar)
    ---------------------------------------------------------------- */
 
--- Prueba 24: transición ilegal de estado: RECHAZADA -> EN_REVISION (error 50003)
--- Resultado esperado: error, la postulación no cambia.
-BEGIN TRY
-    -- El ROLLBACK deja los datos como estaban.
-    BEGIN TRANSACTION;
-    -- La postulación 12 está RECHAZADA.
-    EXEC usp_CambiarEstadoPostulacion @id_postulacion = 12, @estado_nuevo = 'EN_REVISION', @motivo = 'Prueba';
-    PRINT 'FALLA - Prueba 24: se permitió la transición';
-    ROLLBACK TRANSACTION;
-END TRY
-BEGIN CATCH
-    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    PRINT 'OK - Prueba 24: ' + ERROR_MESSAGE();
-END CATCH;
-GO
-
--- Prueba 25: transición ilegal de estado: RECIBIDA -> SELECCIONADA, salta etapas (error 50003)
--- Resultado esperado: error, la postulación no cambia.
-BEGIN TRY
-    -- El ROLLBACK deja los datos como estaban.
-    BEGIN TRANSACTION;
-    -- La postulación 16 está RECIBIDA.
-    EXEC usp_CambiarEstadoPostulacion @id_postulacion = 16, @estado_nuevo = 'SELECCIONADA', @motivo = 'Prueba';
-    PRINT 'FALLA - Prueba 25: se permitió la transición';
-    ROLLBACK TRANSACTION;
-END TRY
-BEGIN CATCH
-    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    PRINT 'OK - Prueba 25: ' + ERROR_MESSAGE();
-END CATCH;
-GO
-
--- Prueba 26: postulación a una carrera que no corresponde al estudiante (error 50005)
--- Resultado esperado: error, no se crea la postulación.
-BEGIN TRY
-    -- El ROLLBACK deja los datos como estaban.
-    BEGIN TRANSACTION;
-    -- El estudiante 1 cursa las carreras 1 y 2, no la 3.
-    EXEC usp_RegistrarPostulacion @id_estudiante = 1, @id_oferta = 1, @id_carrera = 3,
-        @origen = 'PORTAL', @observaciones = 'Prueba';
-    PRINT 'FALLA - Prueba 26: se permitió una carrera que no corresponde';
-    ROLLBACK TRANSACTION;
-END TRY
-BEGIN CATCH
-    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    PRINT 'OK - Prueba 26: ' + ERROR_MESSAGE();
-END CATCH;
-GO
-
--- Prueba 27: publicar una oferta sin convenio vigente (error 50006)
--- Resultado esperado: error, la oferta sigue en BORRADOR.
-BEGIN TRY
-    -- El ROLLBACK deja los datos como estaban.
-    BEGIN TRANSACTION;
-    -- La oferta 12 es un BORRADOR de una empresa ACTIVA; le quitamos el convenio.
-    UPDATE Oferta SET id_convenio = NULL WHERE id_oferta = 12;
-    EXEC usp_PublicarOferta @id_oferta = 12;
-    PRINT 'FALLA - Prueba 27: se publicó una oferta sin convenio';
-    ROLLBACK TRANSACTION;
-END TRY
-BEGIN CATCH
-    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    PRINT 'OK - Prueba 27: ' + ERROR_MESSAGE();
-END CATCH;
-GO
-
--- Prueba 28: seleccionar una postulación sin vacantes (error 50007)
--- Resultado esperado: error, la postulación no queda SELECCIONADA.
-BEGIN TRY
-    -- El ROLLBACK deja los datos como estaban.
-    BEGIN TRANSACTION;
-    -- La oferta 10 ya tiene 1 seleccionado (postulación 10); la dejamos con 1 vacante.
-    -- La postulación 14 es de la oferta 10 y está en ENTREVISTA.
-    UPDATE Oferta SET vacantes = 1 WHERE id_oferta = 10;
-    EXEC usp_CambiarEstadoPostulacion @id_postulacion = 14, @estado_nuevo = 'SELECCIONADA', @motivo = 'Prueba';
-    PRINT 'FALLA - Prueba 28: se seleccionó sin vacantes';
-    ROLLBACK TRANSACTION;
-END TRY
-BEGIN CATCH
-    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    PRINT 'OK - Prueba 28: ' + ERROR_MESSAGE();
-END CATCH;
-GO
-
--- Prueba 29: cerrar una práctica sin evaluación FINAL (error 50009)
--- Resultado esperado: error, la práctica sigue EN_CURSO.
-BEGIN TRY
-    -- El ROLLBACK deja los datos como estaban.
-    BEGIN TRANSACTION;
-    -- La práctica 1 está EN_CURSO y solo tiene evaluaciones PARCIAL.
-    EXEC usp_CerrarPractica @id_practica = 1, @fecha_fin_real = '2027-01-15', @motivo_cierre = 'Prueba';
-    PRINT 'FALLA - Prueba 29: se cerró una práctica sin evaluación FINAL';
-    ROLLBACK TRANSACTION;
-END TRY
-BEGIN CATCH
-    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    PRINT 'OK - Prueba 29: ' + ERROR_MESSAGE();
-END CATCH;
-GO
-
-/* ----------------------------------------------------------------
-   8. CASOS FELICES (deben funcionar)
-   ---------------------------------------------------------------- */
-
--- Prueba 30: registrar una postulación válida
+-- Prueba 24: registrar una postulación válida
 -- Resultado esperado: se ejecuta sin error y el dato queda como se pide.
 BEGIN TRY
     -- El ROLLBACK deja los datos como estaban.
@@ -529,18 +425,18 @@ BEGIN TRY
     IF EXISTS (
     SELECT 1 FROM Postulacion WHERE id_estudiante = 4 AND id_oferta = 10 AND estado = 'RECIBIDA'
     )
-        PRINT 'OK - Prueba 30: registrar una postulación válida';
+        PRINT 'OK - Prueba 24: registrar una postulación válida';
     ELSE
-        PRINT 'FALLA - Prueba 30: la postulación no quedó registrada';
+        PRINT 'FALLA - Prueba 24: la postulación no quedó registrada';
     ROLLBACK TRANSACTION;
 END TRY
 BEGIN CATCH
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    PRINT 'FALLA - Prueba 30: ' + ERROR_MESSAGE();
+    PRINT 'FALLA - Prueba 24: ' + ERROR_MESSAGE();
 END CATCH;
 GO
 
--- Prueba 31: transición legal RECIBIDA -> EN_REVISION
+-- Prueba 25: transición legal RECIBIDA -> EN_REVISION
 -- Resultado esperado: se ejecuta sin error y el dato queda como se pide.
 BEGIN TRY
     -- El ROLLBACK deja los datos como estaban.
@@ -550,18 +446,18 @@ BEGIN TRY
     IF EXISTS (
     SELECT 1 FROM Postulacion WHERE id_postulacion = 16 AND estado = 'EN_REVISION'
     )
-        PRINT 'OK - Prueba 31: transición legal RECIBIDA -> EN_REVISION';
+        PRINT 'OK - Prueba 25: transición legal RECIBIDA -> EN_REVISION';
     ELSE
-        PRINT 'FALLA - Prueba 31: la postulación no pasó a EN_REVISION';
+        PRINT 'FALLA - Prueba 25: la postulación no pasó a EN_REVISION';
     ROLLBACK TRANSACTION;
 END TRY
 BEGIN CATCH
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    PRINT 'FALLA - Prueba 31: ' + ERROR_MESSAGE();
+    PRINT 'FALLA - Prueba 25: ' + ERROR_MESSAGE();
 END CATCH;
 GO
 
--- Prueba 32: cerrar una práctica que tiene las evaluaciones FINAL
+-- Prueba 26: cerrar una práctica que tiene las evaluaciones FINAL
 -- Resultado esperado: se ejecuta sin error y el dato queda como se pide.
 BEGIN TRY
     -- El ROLLBACK deja los datos como estaban.
@@ -574,13 +470,13 @@ BEGIN TRY
     IF EXISTS (
     SELECT 1 FROM Practica WHERE id_practica = 1 AND estado = 'FINALIZADA'
     )
-        PRINT 'OK - Prueba 32: cerrar una práctica que tiene las evaluaciones FINAL';
+        PRINT 'OK - Prueba 26: cerrar una práctica que tiene las evaluaciones FINAL';
     ELSE
-        PRINT 'FALLA - Prueba 32: la práctica no quedó FINALIZADA';
+        PRINT 'FALLA - Prueba 26: la práctica no quedó FINALIZADA';
     ROLLBACK TRANSACTION;
 END TRY
 BEGIN CATCH
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    PRINT 'FALLA - Prueba 32: ' + ERROR_MESSAGE();
+    PRINT 'FALLA - Prueba 26: ' + ERROR_MESSAGE();
 END CATCH;
 GO

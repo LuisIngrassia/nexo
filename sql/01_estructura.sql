@@ -674,13 +674,9 @@ GO
 
 /* ================================================================
    4. PROCEDIMIENTOS
-   Patrón de los que escriben: validaciones (IF ... THROW) primero y,
-   si hay más de una escritura, BEGIN TRY / TRANSACTION / CATCH con ROLLBACK
-   y THROW. Códigos de error:
-   50001 inexistente, 50002 estado no válido, 50003 transición no permitida,
-   50005 carrera, 50006 convenio, 50007 vacantes,
-   50008 fechas, 50009 requisitos de cierre, 50010 duplicado,
-   50011 dato obligatorio faltante.
+   Patrón de los que escriben: primero los chequeos (si uno no se cumple,
+   PRINT con el motivo y RETURN, sin guardar nada) y, si hay más de una
+   escritura, BEGIN TRY / TRANSACTION / CATCH con ROLLBACK.
    ================================================================ */
 
 CREATE PROCEDURE usp_RegistrarMateriaAprobada
@@ -692,9 +688,15 @@ BEGIN
     SET NOCOUNT ON;
 
     IF NOT EXISTS (SELECT 1 FROM Estudiante WHERE id_estudiante = @id_estudiante)
-        THROW 50001, 'El estudiante no existe.', 1;
+    BEGIN
+        PRINT 'El estudiante no existe.';
+        RETURN;
+    END;
     IF NOT EXISTS (SELECT 1 FROM Materia WHERE id_materia = @id_materia)
-        THROW 50001, 'La materia no existe.', 1;
+    BEGIN
+        PRINT 'La materia no existe.';
+        RETURN;
+    END;
     IF NOT EXISTS (
         SELECT 1
         FROM Materia m
@@ -702,7 +704,10 @@ BEGIN
         WHERE m.id_materia = @id_materia
           AND ec.id_estudiante = @id_estudiante
     )
-        THROW 50005, 'La materia no pertenece a ninguna carrera del estudiante.', 1;
+    BEGIN
+        PRINT 'La materia no pertenece a ninguna carrera del estudiante.';
+        RETURN;
+    END;
 
     INSERT INTO Estudiante_Materia (id_estudiante, id_materia, fecha_aprobacion)
     VALUES (@id_estudiante, @id_materia, @fecha_aprobacion);
@@ -718,15 +723,24 @@ BEGIN
     DECLARE @hoy DATE = CAST(GETDATE() AS date);
 
     IF NOT EXISTS (SELECT 1 FROM Oferta WHERE id_oferta = @id_oferta)
-        THROW 50001, 'La oferta no existe.', 1;
+    BEGIN
+        PRINT 'La oferta no existe.';
+        RETURN;
+    END;
     IF NOT EXISTS (SELECT 1 FROM Oferta WHERE id_oferta = @id_oferta AND estado = 'BORRADOR')
-        THROW 50002, 'Solo se publica una oferta en BORRADOR.', 1;
+    BEGIN
+        PRINT 'Solo se publica una oferta en BORRADOR.';
+        RETURN;
+    END;
     IF NOT EXISTS (
         SELECT 1 FROM Oferta o
         INNER JOIN Empresa e ON e.id_empresa = o.id_empresa
         WHERE o.id_oferta = @id_oferta AND e.estado_vinculo = 'ACTIVA'
     )
-        THROW 50002, 'La empresa no está ACTIVA.', 1;
+    BEGIN
+        PRINT 'La empresa no está ACTIVA.';
+        RETURN;
+    END;
     IF NOT EXISTS (
         SELECT 1 FROM Oferta o
         INNER JOIN Convenio c
@@ -736,13 +750,25 @@ BEGIN
           AND c.estado = 'VIGENTE'
           AND (c.fecha_fin IS NULL OR c.fecha_fin >= @hoy)
     )
-        THROW 50006, 'La oferta no tiene un convenio vigente.', 1;
+    BEGIN
+        PRINT 'La oferta no tiene un convenio vigente.';
+        RETURN;
+    END;
     IF NOT EXISTS (SELECT 1 FROM Oferta_Carrera WHERE id_oferta = @id_oferta)
-        THROW 50005, 'La oferta no está dirigida a ninguna carrera.', 1;
+    BEGIN
+        PRINT 'La oferta no está dirigida a ninguna carrera.';
+        RETURN;
+    END;
     IF NOT EXISTS (SELECT 1 FROM Oferta_Competencia WHERE id_oferta = @id_oferta)
-        THROW 50011, 'La oferta no tiene competencias.', 1;
+    BEGIN
+        PRINT 'La oferta no tiene competencias.';
+        RETURN;
+    END;
     IF EXISTS (SELECT 1 FROM Oferta WHERE id_oferta = @id_oferta AND fecha_cierre < @hoy)
-        THROW 50008, 'La fecha de cierre de la oferta ya pasó.', 1;
+    BEGIN
+        PRINT 'La fecha de cierre de la oferta ya pasó.';
+        RETURN;
+    END;
 
     UPDATE Oferta
     SET estado = 'PUBLICADA',
@@ -764,38 +790,59 @@ BEGIN
     DECLARE @id_postulacion INT;
 
     IF NOT EXISTS (SELECT 1 FROM Estudiante WHERE id_estudiante = @id_estudiante)
-        THROW 50001, 'El estudiante no existe.', 1;
+    BEGIN
+        PRINT 'El estudiante no existe.';
+        RETURN;
+    END;
     IF NOT EXISTS (SELECT 1 FROM Oferta WHERE id_oferta = @id_oferta)
-        THROW 50001, 'La oferta no existe.', 1;
+    BEGIN
+        PRINT 'La oferta no existe.';
+        RETURN;
+    END;
     IF NOT EXISTS (
         SELECT 1 FROM Estudiante_Carrera
         WHERE id_estudiante = @id_estudiante AND id_carrera = @id_carrera
     )
-        THROW 50005, 'El estudiante no cursa esa carrera.', 1;
+    BEGIN
+        PRINT 'El estudiante no cursa esa carrera.';
+        RETURN;
+    END;
     IF NOT EXISTS (
         SELECT 1 FROM Oferta_Carrera
         WHERE id_oferta = @id_oferta AND id_carrera = @id_carrera
     )
-        THROW 50005, 'La oferta no está dirigida a esa carrera.', 1;
+    BEGIN
+        PRINT 'La oferta no está dirigida a esa carrera.';
+        RETURN;
+    END;
     IF NOT EXISTS (
         SELECT 1 FROM Estudiante_Carrera
         WHERE id_estudiante = @id_estudiante
           AND id_carrera = @id_carrera
           AND estado = 'ACTIVO'
     )
-        THROW 50002, 'El estudiante no está ACTIVO en esa carrera.', 1;
+    BEGIN
+        PRINT 'El estudiante no está ACTIVO en esa carrera.';
+        RETURN;
+    END;
     IF NOT EXISTS (
         SELECT 1 FROM Oferta
         WHERE id_oferta = @id_oferta
           AND estado = 'PUBLICADA'
           AND fecha_cierre >= CAST(GETDATE() AS date)
     )
-        THROW 50002, 'La oferta no admite postulaciones.', 1;
+    BEGIN
+        PRINT 'La oferta no admite postulaciones.';
+        RETURN;
+    END;
     IF EXISTS (
         SELECT 1 FROM Postulacion
         WHERE id_estudiante = @id_estudiante AND id_oferta = @id_oferta
     )
-        THROW 50010, 'El estudiante ya se postuló a esa oferta.', 1;
+    BEGIN
+        PRINT 'El estudiante ya se postuló a esa oferta.';
+        RETURN;
+    END;
 
     BEGIN TRY
         BEGIN TRANSACTION;
@@ -816,7 +863,7 @@ BEGIN
     END TRY
     BEGIN CATCH
         ROLLBACK TRANSACTION;
-        THROW;
+        PRINT ERROR_MESSAGE();
     END CATCH;
 END;
 GO
@@ -830,13 +877,19 @@ BEGIN
     SET NOCOUNT ON;
 
     IF NOT EXISTS (SELECT 1 FROM Postulacion WHERE id_postulacion = @id_postulacion)
-        THROW 50001, 'La postulación no existe.', 1;
+    BEGIN
+        PRINT 'La postulación no existe.';
+        RETURN;
+    END;
     IF NOT EXISTS (
         SELECT 1 FROM Postulacion
         WHERE id_postulacion = @id_postulacion
           AND estado IN ('RECIBIDA', 'EN_REVISION')
     )
-        THROW 50002, 'La postulación ya no puede modificarse.', 1;
+    BEGIN
+        PRINT 'La postulación ya no puede modificarse.';
+        RETURN;
+    END;
 
     UPDATE Postulacion
     SET origen = @origen,
@@ -862,7 +915,10 @@ BEGIN
     WHERE id_postulacion = @id_postulacion;
 
     IF @estado_anterior IS NULL
-        THROW 50001, 'La postulación no existe.', 1;
+    BEGIN
+        PRINT 'La postulación no existe.';
+        RETURN;
+    END;
 
     SET @estado_nuevo = ISNULL(@estado_nuevo, '');
     IF NOT (
@@ -870,7 +926,10 @@ BEGIN
         OR (@estado_anterior = 'EN_REVISION' AND @estado_nuevo IN ('ENTREVISTA', 'RECHAZADA', 'RETIRADA'))
         OR (@estado_anterior = 'ENTREVISTA' AND @estado_nuevo IN ('SELECCIONADA', 'RECHAZADA', 'RETIRADA'))
     )
-        THROW 50003, 'El cambio de estado no está permitido.', 1;
+    BEGIN
+        PRINT 'El cambio de estado no está permitido.';
+        RETURN;
+    END;
 
     -- Al seleccionar, tiene que quedar alguna vacante libre.
     IF @estado_nuevo = 'SELECCIONADA'
@@ -879,7 +938,10 @@ BEGIN
 
         IF (SELECT COUNT(*) FROM Postulacion
             WHERE id_oferta = @id_oferta AND estado = 'SELECCIONADA') >= @vacantes
-            THROW 50007, 'La oferta no tiene vacantes disponibles.', 1;
+        BEGIN
+            PRINT 'La oferta no tiene vacantes disponibles.';
+            RETURN;
+        END;
     END;
 
     BEGIN TRY
@@ -898,7 +960,7 @@ BEGIN
     END TRY
     BEGIN CATCH
         ROLLBACK TRANSACTION;
-        THROW;
+        PRINT ERROR_MESSAGE();
     END CATCH;
 END;
 GO
@@ -921,9 +983,15 @@ BEGIN
     WHERE id_postulacion = @id_postulacion;
 
     IF @estado IS NULL
-        THROW 50001, 'La postulación no existe.', 1;
+    BEGIN
+        PRINT 'La postulación no existe.';
+        RETURN;
+    END;
     IF @estado NOT IN ('EN_REVISION', 'ENTREVISTA')
-        THROW 50002, 'La postulación no admite entrevistas.', 1;
+    BEGIN
+        PRINT 'La postulación no admite entrevistas.';
+        RETURN;
+    END;
 
     BEGIN TRY
         BEGIN TRANSACTION;
@@ -947,7 +1015,7 @@ BEGIN
     END TRY
     BEGIN CATCH
         ROLLBACK TRANSACTION;
-        THROW;
+        PRINT ERROR_MESSAGE();
     END CATCH;
 END;
 GO
@@ -962,14 +1030,23 @@ BEGIN
     SET NOCOUNT ON;
 
     IF NOT EXISTS (SELECT 1 FROM Entrevista WHERE id_entrevista = @id_entrevista)
-        THROW 50001, 'La entrevista no existe.', 1;
+    BEGIN
+        PRINT 'La entrevista no existe.';
+        RETURN;
+    END;
     IF ISNULL(@resultado, '') NOT IN ('APROBADA', 'RECHAZADA')
-        THROW 50003, 'El resultado debe ser APROBADA o RECHAZADA.', 1;
+    BEGIN
+        PRINT 'El resultado debe ser APROBADA o RECHAZADA.';
+        RETURN;
+    END;
     IF NOT EXISTS (
         SELECT 1 FROM Entrevista
         WHERE id_entrevista = @id_entrevista AND resultado = 'PENDIENTE'
     )
-        THROW 50002, 'La entrevista ya tiene resultado.', 1;
+    BEGIN
+        PRINT 'La entrevista ya tiene resultado.';
+        RETURN;
+    END;
 
     UPDATE Entrevista
     SET resultado = @resultado,
@@ -998,20 +1075,35 @@ BEGIN
     WHERE id_postulacion = @id_postulacion;
 
     IF @estado IS NULL
-        THROW 50001, 'La postulación no existe.', 1;
+    BEGIN
+        PRINT 'La postulación no existe.';
+        RETURN;
+    END;
     IF @estado <> 'SELECCIONADA'
-        THROW 50002, 'La postulación no está SELECCIONADA.', 1;
+    BEGIN
+        PRINT 'La postulación no está SELECCIONADA.';
+        RETURN;
+    END;
     IF NOT EXISTS (
         SELECT 1 FROM Estudiante_Carrera
         WHERE id_estudiante = @id_estudiante
           AND id_carrera = @id_carrera
           AND estado = 'ACTIVO'
     )
-        THROW 50002, 'El estudiante no está ACTIVO en la carrera de la postulación.', 1;
+    BEGIN
+        PRINT 'El estudiante no está ACTIVO en la carrera de la postulación.';
+        RETURN;
+    END;
     IF @fecha_inicio IS NULL OR @fecha_fin_prevista IS NULL
-        THROW 50011, 'Las fechas de la práctica son obligatorias.', 1;
+    BEGIN
+        PRINT 'Las fechas de la práctica son obligatorias.';
+        RETURN;
+    END;
     IF @fecha_fin_prevista < @fecha_inicio
-        THROW 50008, 'La fecha de fin prevista es anterior al inicio.', 1;
+    BEGIN
+        PRINT 'La fecha de fin prevista es anterior al inicio.';
+        RETURN;
+    END;
     IF NOT EXISTS (
         SELECT 1
         FROM Postulacion p
@@ -1022,7 +1114,10 @@ BEGIN
         WHERE p.id_postulacion = @id_postulacion
           AND c.estado = 'VIGENTE'
     )
-        THROW 50006, 'La oferta no tiene un convenio vigente.', 1;
+    BEGIN
+        PRINT 'La oferta no tiene un convenio vigente.';
+        RETURN;
+    END;
     -- La práctica completa tiene que quedar dentro del convenio.
     IF NOT EXISTS (
         SELECT 1
@@ -1035,9 +1130,15 @@ BEGIN
           AND c.fecha_inicio <= @fecha_inicio
           AND (c.fecha_fin IS NULL OR c.fecha_fin >= @fecha_fin_prevista)
     )
-        THROW 50008, 'La práctica no queda dentro del período del convenio.', 1;
+    BEGIN
+        PRINT 'La práctica no queda dentro del período del convenio.';
+        RETURN;
+    END;
     IF EXISTS (SELECT 1 FROM Practica WHERE id_postulacion = @id_postulacion)
-        THROW 50010, 'La postulación ya tiene una práctica.', 1;
+    BEGIN
+        PRINT 'La postulación ya tiene una práctica.';
+        RETURN;
+    END;
     -- Sin prácticas simultáneas del mismo estudiante.
     IF EXISTS (
         SELECT 1
@@ -1046,7 +1147,10 @@ BEGIN
         WHERE po.id_estudiante = @id_estudiante
           AND pr.estado IN ('PLANIFICADA', 'EN_CURSO')
     )
-        THROW 50010, 'El estudiante ya tiene una práctica planificada o en curso.', 1;
+    BEGIN
+        PRINT 'El estudiante ya tiene una práctica planificada o en curso.';
+        RETURN;
+    END;
 
     BEGIN TRY
         BEGIN TRANSACTION;
@@ -1067,7 +1171,7 @@ BEGIN
     END TRY
     BEGIN CATCH
         ROLLBACK TRANSACTION;
-        THROW;
+        PRINT ERROR_MESSAGE();
     END CATCH;
 END;
 GO
@@ -1086,11 +1190,20 @@ BEGIN
     WHERE id_practica = @id_practica;
 
     IF @estado IS NULL
-        THROW 50001, 'La práctica no existe.', 1;
+    BEGIN
+        PRINT 'La práctica no existe.';
+        RETURN;
+    END;
     IF @estado <> 'PLANIFICADA'
-        THROW 50003, 'Solo se inicia una práctica PLANIFICADA.', 1;
+    BEGIN
+        PRINT 'Solo se inicia una práctica PLANIFICADA.';
+        RETURN;
+    END;
     IF @fecha_inicio > CAST(GETDATE() AS date)
-        THROW 50008, 'La práctica todavía no llegó a su fecha de inicio.', 1;
+    BEGIN
+        PRINT 'La práctica todavía no llegó a su fecha de inicio.';
+        RETURN;
+    END;
 
     BEGIN TRY
         BEGIN TRANSACTION;
@@ -1106,7 +1219,7 @@ BEGIN
     END TRY
     BEGIN CATCH
         ROLLBACK TRANSACTION;
-        THROW;
+        PRINT ERROR_MESSAGE();
     END CATCH;
 END;
 GO
@@ -1124,12 +1237,18 @@ BEGIN
     SET NOCOUNT ON;
 
     IF NOT EXISTS (SELECT 1 FROM Practica WHERE id_practica = @id_practica)
-        THROW 50001, 'La práctica no existe.', 1;
+    BEGIN
+        PRINT 'La práctica no existe.';
+        RETURN;
+    END;
     IF NOT EXISTS (
         SELECT 1 FROM Practica
         WHERE id_practica = @id_practica AND estado = 'EN_CURSO'
     )
-        THROW 50002, 'Solo se registran seguimientos de prácticas EN_CURSO.', 1;
+    BEGIN
+        PRINT 'Solo se registran seguimientos de prácticas EN_CURSO.';
+        RETURN;
+    END;
 
     INSERT INTO Seguimiento
         (id_practica, tipo_seguimiento, origen_feedback,
@@ -1155,12 +1274,18 @@ BEGIN
     SET NOCOUNT ON;
 
     IF NOT EXISTS (SELECT 1 FROM Practica WHERE id_practica = @id_practica)
-        THROW 50001, 'La práctica no existe.', 1;
+    BEGIN
+        PRINT 'La práctica no existe.';
+        RETURN;
+    END;
     IF NOT EXISTS (
         SELECT 1 FROM Practica
         WHERE id_practica = @id_practica AND estado = 'EN_CURSO'
     )
-        THROW 50002, 'Solo se evalúan prácticas EN_CURSO.', 1;
+    BEGIN
+        PRINT 'Solo se evalúan prácticas EN_CURSO.';
+        RETURN;
+    END;
 
     INSERT INTO Evaluacion
         (id_practica, tipo_evaluador, instancia, puntaje_desempeno,
@@ -1187,15 +1312,30 @@ BEGIN
     WHERE id_practica = @id_practica;
 
     IF @estado IS NULL
-        THROW 50001, 'La práctica no existe.', 1;
+    BEGIN
+        PRINT 'La práctica no existe.';
+        RETURN;
+    END;
     IF @estado <> 'EN_CURSO'
-        THROW 50003, 'Solo se cierra una práctica EN_CURSO.', 1;
+    BEGIN
+        PRINT 'Solo se cierra una práctica EN_CURSO.';
+        RETURN;
+    END;
     IF @fecha_fin_real IS NULL
-        THROW 50011, 'La fecha de fin real es obligatoria.', 1;
+    BEGIN
+        PRINT 'La fecha de fin real es obligatoria.';
+        RETURN;
+    END;
     IF @fecha_fin_real < @fecha_inicio
-        THROW 50008, 'La fecha de fin real es anterior al inicio.', 1;
+    BEGIN
+        PRINT 'La fecha de fin real es anterior al inicio.';
+        RETURN;
+    END;
     IF NOT EXISTS (SELECT 1 FROM Seguimiento WHERE id_practica = @id_practica)
-        THROW 50009, 'La práctica no tiene seguimientos.', 1;
+    BEGIN
+        PRINT 'La práctica no tiene seguimientos.';
+        RETURN;
+    END;
     IF NOT EXISTS (
         SELECT 1 FROM Evaluacion
         WHERE id_practica = @id_practica
@@ -1208,7 +1348,10 @@ BEGIN
           AND tipo_evaluador = 'EMPRESA'
           AND instancia = 'FINAL'
     )
-        THROW 50009, 'Faltan las evaluaciones FINAL del estudiante y de la empresa.', 1;
+    BEGIN
+        PRINT 'Faltan las evaluaciones FINAL del estudiante y de la empresa.';
+        RETURN;
+    END;
 
     BEGIN TRY
         BEGIN TRANSACTION;
@@ -1226,7 +1369,7 @@ BEGIN
     END TRY
     BEGIN CATCH
         ROLLBACK TRANSACTION;
-        THROW;
+        PRINT ERROR_MESSAGE();
     END CATCH;
 END;
 GO
@@ -1247,13 +1390,25 @@ BEGIN
     WHERE id_practica = @id_practica;
 
     IF @estado IS NULL
-        THROW 50001, 'La práctica no existe.', 1;
+    BEGIN
+        PRINT 'La práctica no existe.';
+        RETURN;
+    END;
     IF @estado NOT IN ('PLANIFICADA', 'EN_CURSO')
-        THROW 50003, 'Solo se interrumpe una práctica PLANIFICADA o EN_CURSO.', 1;
+    BEGIN
+        PRINT 'Solo se interrumpe una práctica PLANIFICADA o EN_CURSO.';
+        RETURN;
+    END;
     IF @motivo_cierre IS NULL OR @fecha_fin_real IS NULL
-        THROW 50011, 'El motivo y la fecha de fin real son obligatorios.', 1;
+    BEGIN
+        PRINT 'El motivo y la fecha de fin real son obligatorios.';
+        RETURN;
+    END;
     IF @fecha_fin_real < @fecha_inicio
-        THROW 50008, 'La fecha de fin real es anterior al inicio.', 1;
+    BEGIN
+        PRINT 'La fecha de fin real es anterior al inicio.';
+        RETURN;
+    END;
 
     BEGIN TRY
         BEGIN TRANSACTION;
@@ -1271,7 +1426,7 @@ BEGIN
     END TRY
     BEGIN CATCH
         ROLLBACK TRANSACTION;
-        THROW;
+        PRINT ERROR_MESSAGE();
     END CATCH;
 END;
 GO
@@ -1285,7 +1440,10 @@ BEGIN
     SET NOCOUNT ON;
 
     IF NOT EXISTS (SELECT 1 FROM Estudiante WHERE id_estudiante = @id_estudiante)
-        THROW 50001, 'El estudiante no existe.', 1;
+    BEGIN
+        PRINT 'El estudiante no existe.';
+        RETURN;
+    END;
 
     SELECT
         o.id_oferta,

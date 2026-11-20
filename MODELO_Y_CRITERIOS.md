@@ -20,7 +20,7 @@
 
 ## Reglas que aplican los procedimientos
 
-Los procedimientos usan `THROW` con estos códigos: 50001 entidad inexistente, 50002 estado no válido, 50003 transición no permitida, 50005 la carrera no corresponde, 50006 convenio no vigente, 50007 sin vacantes, 50008 fechas incoherentes, 50009 faltan requisitos de cierre, 50010 duplicado, 50011 dato obligatorio faltante.
+Los procedimientos controlan las reglas antes de guardar: si una no se cumple, muestran el motivo con `PRINT` y terminan con `RETURN`, sin guardar nada.
 
 - Publicar una oferta exige convenio VIGENTE y al menos una carrera asociada.
 - Postularse exige estar ACTIVO en la carrera indicada.
